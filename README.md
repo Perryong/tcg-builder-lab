@@ -53,3 +53,4 @@ The initial meta snapshot contains 242 records from [One Piece Top Decks' OP-17 
 Eight leader guides provide qualitative strengths, weaknesses, and construction suggestions based on printed leader effects. They are explicitly labeled as analysis, not measured matchup evidence. Custom decks receive structural observations, not fictional win rates. No matchup simulation or strength score is implemented. Current guidance does not claim to provide exhaustive matchup analysis.
 
 Snapshots older than 14 days are labeled stale. Updates are manual commands; no unattended job, account, database, or public hosting was added.
+# tcg-builder-lab
