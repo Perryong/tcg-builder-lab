@@ -11,7 +11,8 @@
     "update:catalog": "node scripts/import-catalog.mjs && node scripts/repair-artwork.mjs",
     "update:meta": "node scripts/import-meta.mjs",
     "test:e2e": "playwright test",
-    "repair:artwork": "node scripts/repair-artwork.mjs"
+    "repair:artwork": "node scripts/repair-artwork.mjs",
+    "update:pokemon": "node scripts/import-pokemon.mjs"
   },
   "engines": {
     "node": ">=22.18.0"
