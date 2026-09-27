@@ -4,8 +4,8 @@ import type { Card, CatalogSnapshot } from './data.ts';
 import { colors, filterCards, setCounts } from './catalog.ts';
 import type { CardQuery } from './catalog.ts';
 export function CardImage({ card, className = '' }: { card: Card; className?: string }) {
-  const [failed, setFailed] = useState(false);
-  useEffect(() => setFailed(false), [card.imageUrl]);
+  const [failed, setFailed] = useState(card.artworkAvailable === false);
+  useEffect(() => setFailed(card.artworkAvailable === false), [card.imageUrl, card.artworkAvailable]);
   return failed ? <div className={`art-placeholder ${className}`}><Layers3 size={32}/><span>{card.name}</span><small>Artwork unavailable</small></div> : <img className={`card-image ${className}`} src={card.imageUrl} alt={`${card.name} · ${card.number}`} loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(true)}/>;
 }
 export function ColorDots({ values }: { values: string[] }) { return <span className="color-dots" aria-label={values.join(' / ')}>{values.map(c => <i key={c} style={{ background: { Red: '#c94c50', Green: '#479a78', Blue: '#5482bd', Purple: '#8f6aaf', Black: '#343b40', Yellow: '#d8b950' }[c] }}/>)}</span>; }
@@ -34,7 +34,7 @@ export default function Catalog({ snapshot, onAdd }: { snapshot: CatalogSnapshot
   const [sort, setSort] = useState('latest');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Card | null>(null);
-  const setRank = useMemo(() => new Map([...snapshot.sets].sort((a,b) => Number(b.series) - Number(a.series)).map((s,i) => [s.code,i])), [snapshot]);
+  const setRank = useMemo(() => new Map([...snapshot.sets].sort((a,b) => (a.category === 'Booster' ? 0 : 1) - (b.category === 'Booster' ? 0 : 1) || Number(b.series) - Number(a.series)).map((s,i) => [s.code,i])), [snapshot]);
   const filtered = useMemo(() => {
     let rows = filterCards(snapshot.cards, query);
     if (!artworks) { const seen = new Set<string>(); rows = rows.filter(c => { if (seen.has(c.number)) return false; seen.add(c.number); return true; }); }

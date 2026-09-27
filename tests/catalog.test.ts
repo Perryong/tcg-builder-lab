@@ -37,3 +37,8 @@ test('combined filters intersect and zero-cost cards remain searchable', () => {
   assert.deepEqual(catalog.filterCards(cards, { search: 'nAmI', setCode: 'OP-01', color: 'Red', type: 'CHARACTER', rarity: '', cost: '0' }).map(c => c.number), ['OP01-002']);
   assert.equal(catalog.filterCards(cards, { search: 'op01-001', setCode: '', color: 'Blue', type: '', rarity: '', cost: '' }).length, 0);
 });
+test('public artwork links match exact variants and missing art is marked unavailable',()=>{
+ const mapped=importer.attachArtwork({...snapshot,cards:[{...c,id:'OP-01:OP01-001'},{...c,id:'OP-01:OP01-001_p1'}]},[{card_image_id:'OP01-001',card_image:'https://optcgapi.com/media/static/Card_Images/OP01-001.jpg'}]);
+ assert.equal(mapped.cards[0].imageUrl,'https://optcgapi.com/media/static/Card_Images/OP01-001.jpg');
+ assert.equal(mapped.cards[1].artworkAvailable,false);
+});

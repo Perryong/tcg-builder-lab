@@ -3,7 +3,7 @@ export type Card = {
   colors: string[]; type: string; rarity: string; cost: number | null;
   power: number | null; counter: number | null; life: number | null;
   traits: string[]; text: string; trigger: string; imageUrl: string; sourceUrl: string;
-  block: string | null; attribute: string;
+  block: string | null; attribute: string; artworkAvailable?: boolean;
 };
 export type SetRecord = {
   code: string; name: string; series: string; category: string;
@@ -18,7 +18,7 @@ export type RulesSnapshot = {
   mainCount: number; donCount: number; copyLimit: number;
   restrictions: { number: string; limit: number; effectiveFrom: string }[];
   bannedPairs: { numbers: [string, string]; effectiveFrom: string }[];
-  copyExceptions: Record<string, number>; leaderExceptions: Record<string, { mainCount?: number; onlyTraits?: string[] }>;
+  copyExceptions: Record<string, number>; leaderExceptions: Record<string, { mainCount?: number; onlyTraits?: string[]; maxCost?: number; maxEventCost?: number; donCount?: number }>;
   notes: string[];
 };
 export type EventRecord = {

@@ -1,0 +1,94 @@
+{
+  "region": "Asia",
+  "checkedAt": "2026-09-27T09:13:36.932Z",
+  "verified": false,
+  "sourceUrls": [
+    "https://asia-en.onepiece-cardgame.com/pdf/rule_comprehensive.pdf?20260911=",
+    "https://asia-en.onepiece-cardgame.com/news/restriction.html",
+    "https://asia-en.onepiece-cardgame.com/topics/021.php"
+  ],
+  "mainCount": 50,
+  "donCount": 10,
+  "copyLimit": 4,
+  "restrictions": [
+    {
+      "number": "OP06-047",
+      "limit": 0,
+      "effectiveFrom": "2026-09-27"
+    },
+    {
+      "number": "OP03-040",
+      "limit": 0,
+      "effectiveFrom": "2026-09-27"
+    },
+    {
+      "number": "OP06-086",
+      "limit": 0,
+      "effectiveFrom": "2026-09-27"
+    },
+    {
+      "number": "ST10-001",
+      "limit": 0,
+      "effectiveFrom": "2026-09-27"
+    },
+    {
+      "number": "OP06-116",
+      "limit": 0,
+      "effectiveFrom": "2026-09-27"
+    },
+    {
+      "number": "OP14-020",
+      "limit": 0,
+      "effectiveFrom": "2026-10-12"
+    }
+  ],
+  "bannedPairs": [
+    {
+      "numbers": [
+        "OP11-040",
+        "OP11-067"
+      ],
+      "effectiveFrom": "2026-09-27"
+    },
+    {
+      "numbers": [
+        "OP11-040",
+        "OP08-069"
+      ],
+      "effectiveFrom": "2026-09-27"
+    },
+    {
+      "numbers": [
+        "OP07-115",
+        "EB04-058"
+      ],
+      "effectiveFrom": "2026-09-27"
+    }
+  ],
+  "copyExceptions": {
+    "OP01-075": 50,
+    "OP08-072": 50,
+    "OP16-042": 50
+  },
+  "leaderExceptions": {
+    "OP15-058": {
+      "donCount": 6
+    },
+    "OP12-001": {
+      "maxCost": 4
+    },
+    "OP13-079": {
+      "maxEventCost": 1
+    },
+    "P-117": {
+      "onlyTraits": [
+        "East Blue"
+      ]
+    }
+  },
+  "notes": [
+    "General deck construction, current bans, banned pairs, announced changes, and known leader exceptions are checked.",
+    "Tournament legality is not certified: Standard block-number updates, product release dates, and regional language eligibility require checking with your event organizer.",
+    "Existing bans and pairs are recorded as observed on September 27, 2026; earlier historical legality is not reconstructed."
+  ]
+}

@@ -44,6 +44,14 @@ export async function publishCatalog(path, candidate) {
   await writeFile(temporary, JSON.stringify(candidate));
   await rename(temporary, path);
 }
+export function attachArtwork(snapshot, imageRecords) {
+  const index = new Map(imageRecords.filter(r => typeof r.card_image === 'string' && r.card_image.startsWith('https://optcgapi.com/media/')).map(r => [r.card_image_id, r.card_image]));
+  return { ...snapshot, cards: snapshot.cards.map(card => {
+    const variant = card.id.includes(':') ? card.id.split(':')[1] : card.id;
+    const image = index.get(variant);
+    return { ...card, imageUrl: image ?? card.imageUrl, artworkAvailable: !!image };
+  }) };
+}
 async function get(url) {
   const response = await fetch(url, { signal: AbortSignal.timeout(30000), headers: { 'User-Agent': 'GrandLineLocalCatalog/0.1' } });
   if (!response.ok) throw new Error(`${response.status}: ${url}`);
@@ -66,7 +74,18 @@ async function main() {
   }
   // ponytail: official catalog only; add licensed sources for worldwide and missing-product coverage.
   const snapshot = { region: 'Asia', checkedAt: new Date().toISOString(), coverage: 'partial', coverageNotes: `All ${sets.length} available official Asia catalog groups imported and artwork counts reconciled. Worldwide coverage and release-date legality are not certified. Artwork is linked from Bandai; this local app is unofficial.`, sets, cards };
-  await publishCatalog(resolve('public/data/catalog.json'), snapshot);
+  const imageRows = [];
+  for (const endpoint of ['allSetCards','allSTCards']) {
+    const response = await fetch(`https://optcgapi.com/api/${endpoint}/`, {signal: AbortSignal.timeout(30000)});
+    if (!response.ok) throw new Error(`Public artwork API unavailable: ${endpoint}. Previous snapshot preserved.`);
+    const rows = await response.json();
+    if (!Array.isArray(rows) || !rows.length) throw new Error('Artwork API format changed.');
+    imageRows.push(...rows);
+  }
+  const enriched = attachArtwork(snapshot, imageRows);
+  const displayed = enriched.cards.filter(c => c.artworkAvailable).length;
+  enriched.coverageNotes += ` ${displayed} illustrations have public OPTCG API image links; other artwork is available via the official card link. Release dates are unverified.`;
+  await publishCatalog(resolve('public/data/catalog.json'), enriched);
   console.log(`Published ${cards.length} illustrations / ${new Set(cards.map(c => c.number)).size} unique cards / ${sets.length} groups.`);
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
