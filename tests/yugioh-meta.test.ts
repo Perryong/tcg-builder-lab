@@ -1,0 +1,3 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {selectYugiohEvidence} from '../src/yugioh/meta.ts';import {parseSourceDeck} from '../scripts/import-yugioh-meta.mjs';
+test('future and opposite format records never enter sample shares',()=>{const s={events:[{format:'tcg',date:'2026-09-01'},{format:'ocg',date:'2026-09-01'},{format:'tcg',date:'2026-10-01'}]};assert.equal(selectYugiohEvidence(s,'tcg','2026-08-01','2026-09-27').length,1);});
+test('HTTP success error pages cannot become source lists',()=>{assert.throws(()=>parseSourceDeck('<html>Unavailable</html>'));assert.throws(()=>parseSourceDeck("var maindeckjs = '[\"100\"]';var extradeckjs='[]';var sidedeckjs='[]';"));});

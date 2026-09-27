@@ -1,0 +1,144 @@
+[
+  {
+    "id": "Invoked",
+    "format": "tcg",
+    "publishedAt": "2026-09-27",
+    "sourceUrls": [
+      "https://ygoprodeck.com/deck/invoked-732037",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=12852&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=12843&request_locale=en"
+    ],
+    "signatureCards": [
+      "12852",
+      "12843"
+    ],
+    "title": "Invoked",
+    "gamePlan": "Search Invocation with Aleister, then use Fusion materials from the hand, field and graveyards. Recycle Invocation and Aleister for later turns.",
+    "strengths": [
+      "A compact Fusion engine leaves room for disruption.",
+      "Invocation can use opposing graveyard materials."
+    ],
+    "weaknesses": [
+      "Interrupting Aleister’s search can stop access to Invocation.",
+      "Graveyard disruption limits material access and recycling."
+    ],
+    "suggestions": [
+      "Test opening hands and disruption points against the published list. Check current format restrictions before play."
+    ]
+  },
+  {
+    "id": "Power Patron",
+    "format": "tcg",
+    "publishedAt": "2026-09-27",
+    "sourceUrls": [
+      "https://ygoprodeck.com/deck/power-patron-732049",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=22519&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=22565&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=22566&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=21423&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=21777&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=21419&request_locale=en"
+    ],
+    "signatureCards": [
+      "21423",
+      "21777",
+      "21419"
+    ],
+    "title": "Power Patron",
+    "gamePlan": "Use Medius to access a Power Patron monster, then sequence the Fusion, Synchro and Xyz engines around their Extra Deck restrictions.",
+    "strengths": [
+      "Medius can search or directly summon an engine piece.",
+      "Different summoning engines offer varied removal options."
+    ],
+    "weaknesses": [
+      "Power Patron engine monsters impose different Extra Deck locks.",
+      "Multi-engine hands require careful sequencing and can conflict."
+    ],
+    "suggestions": [
+      "Test opening hands and disruption points against the published list. Check current format restrictions before play."
+    ]
+  },
+  {
+    "id": "Xenovader△",
+    "format": "ocg",
+    "publishedAt": "2026-09-27",
+    "sourceUrls": [
+      "https://ygoprodeck.com/deck/xenovader%E7%AC%86%EF%BD%B3-731009",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=23554&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=23555&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=23556&request_locale=en"
+    ],
+    "signatureCards": [],
+    "title": "Xenovader△",
+    "gamePlan": "Build face-down banished resources to enable the Xenovader effects; plan around the deck cards spent as fuel.",
+    "strengths": [
+      "Face-down banishment enables scaling effects.",
+      "The published list mixes engine access with disruption."
+    ],
+    "weaknesses": [
+      "Banishing deck cards can remove essential follow-up pieces.",
+      "Resource thresholds require setup before stronger effects become available."
+    ],
+    "suggestions": [
+      "Test opening hands and disruption points against the published list. Check current format restrictions before play."
+    ]
+  },
+  {
+    "id": "Branded Dracotail",
+    "format": "ocg",
+    "publishedAt": "2026-09-27",
+    "sourceUrls": [
+      "https://ygoprodeck.com/deck/branded-dracotail-731011",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=17066&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=21354&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=21355&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=21355&request_locale=en"
+    ],
+    "signatureCards": [
+      "21355"
+    ],
+    "title": "Branded Dracotail",
+    "gamePlan": "Combine Branded Fusion plays with Dracotail material effects. Faimena enables a Quick Effect Fusion Summon and sets a Dracotail Spell/Trap when used as material.",
+    "strengths": [
+      "Fusion materials can generate follow-up Spell/Trap access.",
+      "Faimena offers Fusion play during the Main Phase."
+    ],
+    "weaknesses": [
+      "Discarding and consuming materials requires resource planning.",
+      "Search interruption and graveyard removal can reduce follow-up."
+    ],
+    "suggestions": [
+      "Test opening hands and disruption points against the published list. Check current format restrictions before play."
+    ]
+  },
+  {
+    "id": "Ars Magna Elfnote",
+    "format": "ocg",
+    "publishedAt": "2026-09-27",
+    "sourceUrls": [
+      "https://ygoprodeck.com/deck/ars-magna-elfnote-731012",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=22116&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=22117&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=22118&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=22116&request_locale=en",
+      "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=21419&request_locale=en"
+    ],
+    "signatureCards": [
+      "22116",
+      "21419"
+    ],
+    "title": "Ars Magna Elfnote",
+    "gamePlan": "Use Medius for engine access and Lucina to search Elfnote monsters. Preserve the center Main Monster Zone for Elfnote effects.",
+    "strengths": [
+      "Lucina can summon itself and search a partner.",
+      "Its opponent-turn effect offers positional interaction and a bounce."
+    ],
+    "weaknesses": [
+      "Center-zone positioning constrains sequencing.",
+      "Once-per-turn effects make interrupted searches significant."
+    ],
+    "suggestions": [
+      "Test opening hands and disruption points against the published list. Check current format restrictions before play."
+    ]
+  }
+]

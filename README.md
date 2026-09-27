@@ -92,3 +92,18 @@ Sources: [TCGdex metadata](https://github.com/tcgdex/cards-database), [TCGdex as
 Pokémon artwork repair: `npm run repair:pokemon-artwork` fills missing links from the public [Pokémon TCG data repository](https://github.com/PokemonTCG/pokemon-tcg-data), matching an unambiguous English set name, collector number and card name. Each additional link must return successful image content; a missing high-resolution image can use the same card’s small image. Failed requests abort publication, and confirmed missing images remain unavailable. Existing TCGdex images stay intact. `npm run update:pokemon` also runs this repair. The current snapshot has 20,369 artwork links; 921 printings still have no exact image mapping. Artwork stays remote; no substitute printings or generated illustrations are used.
 
 30th Anniversary artwork uses [TCGJoin’s 30th Celebration catalog](https://tcgjoin.com/en/pokemon-30th-celebration-cards) to resolve exact TCGplayer artwork URLs. All 30 Classic Collection cards and all 161 main-set printings have verified image responses. Classic Collection mapping accounts for original printed collector numbers versus TCGdex’s sequential IDs. The seven last-revealed cards use individually reviewed, attributed image mappings in `scripts/pokemon-30th-artwork.json`; their English artwork, collector numbers and RGB colors were visually checked. The standard artwork repair command refreshes these mappings too.
+
+### Yu-Gi-Oh! English / Japanese
+
+Select Yu-Gi-Oh! to browse localized cards and sets, build separate Main/Extra/Side sections, save decks locally, and import/export exact card IDs or `.ydk` passwords. Card language does not change TCG/OCG deck format. Tournament evidence is separated by format and date window.
+
+Catalog metadata: [YAML Yugi](https://github.com/DawnbrandBots/yaml-yugi). Genuine language-specific art: [YGOResources artwork index](https://github.com/yugioh-artworks/artworks-index). Browser image serving follows that provider’s documented web-app usage. Images are not generated and are not guaranteed for every printing. Set counts represent imported unique identities and printing records, not certified advertised product totals.
+
+Rebuild metadata from a pinned local YAML Yugi checkout and downloaded artwork manifest and YGOPRODeck card metadata:
+
+```sh
+YUGIOH_SOURCE=/path/to/yaml-yugi YUGIOH_ART_MANIFEST=/path/to/manifest.json YUGIOH_PASSCODE_SOURCE=/path/to/cardinfo.json node scripts/import-yugioh.mjs
+node scripts/import-yugioh-meta.mjs
+```
+
+Restriction flags and regional releases are not fully certified; deck legality stays **unverified** when evidence is incomplete. The meta snapshot is five published placements from two September 2026 events, with qualitative guidance derived from printed effects. It is a small sample, not a global ranking or measured win rate.

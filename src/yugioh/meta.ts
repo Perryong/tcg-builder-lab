@@ -1,0 +1,3 @@
+import type {YugiohMeta,YugiohFormat,YugiohDeck,YugiohCard} from './data.ts';
+export function selectYugiohEvidence(s:YugiohMeta,format:YugiohFormat,from:string,to:string){return s.events.filter(e=>e.format===format&&e.date>=from&&e.date<=to);}
+export function analyzeYugiohDeck(d:YugiohDeck,cards:YugiohCard[],s:YugiohMeta){const ids=new Set([...Object.keys(d.main),...Object.keys(d.extra)]);return {observations:['Main '+Object.values(d.main).reduce((a,b)=>a+b,0)+' · Extra '+Object.values(d.extra).reduce((a,b)=>a+b,0)+' · Side '+Object.values(d.side).reduce((a,b)=>a+b,0),'Card counts do not establish combo consistency or matchup win rates.'],guides:s.guides.filter(g=>g.format===d.format&&g.signatureCards.some(id=>ids.has(id)))};}
