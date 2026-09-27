@@ -110,7 +110,7 @@ Export `normalizePokemonCatalog(raw:unknown):PokemonCatalog`, `filterPokemonCard
 - [x] Run `npm test`, `npm run build -- --base=/tcg-builder-lab/`, and `CI=1 PLAYWRIGHT_PREVIEW=1 npm run test:e2e`; all pass. Inspect desktop/mobile screenshots with rendered artwork. Check failed importer cases through runnable tests; do not deliberately damage published snapshots.
 - [x] Perform one independent whole-branch review with Superpowers requesting-code-review; fix Important/Critical findings with regressions and rerun affected checks. Preserve implementation decisions and actual source counts/limitations in `docs/superpowers/pokemon-implementation-report.md`.
 - [x] Update README with game scope, source revision/artwork counts, Standard limitations, Live import behavior, separate browser saves, refresh commands, and attribution. Verify the existing workflow runs all new tests and the subpath remains correct.
-- [ ] Commit final corrections, integrate the verified feature into `main` without force pushing, push to the authorized repository, and watch CI/deploy to completion. Verify public game switching, Pokémon artwork, deck editing, and meta at `https://perryong.github.io/tcg-builder-lab/`. Report deployed URL, check results and real remaining data limitations.
+- [x] Commit final corrections, integrate the verified feature into `main` without force pushing, push to the authorized repository, and watch CI/deploy to completion. Verify public game switching, Pokémon artwork, deck editing, and meta at `https://perryong.github.io/tcg-builder-lab/`. Report deployed URL, check results and real remaining data limitations.
 
 ## Plan self-review
 

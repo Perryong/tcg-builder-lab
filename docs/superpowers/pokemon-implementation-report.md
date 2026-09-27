@@ -26,3 +26,5 @@ One independent whole-branch review identified two important corrections. The mo
 Final local verification: 36 unit checks passed; production build passed with `/tcg-builder-lab/`; all 10 Playwright flows passed, including existing One Piece behavior, live artwork, game switching, saves, transfer errors, mobile navigation/overflow, corrupt storage and fetch failure isolation. Desktop library and mobile meta screenshots were inspected.
 
 GitHub Actions runs these checks before deploying through the existing Pages workflow. Release completion additionally requires a successful workflow and checks against the public site.
+
+Release verified: application commit `dc0044f` was integrated into main and published successfully by [GitHub Actions run 36315185892](https://github.com/Perryong/tcg-builder-lab/actions/runs/36315185892). Public checks confirmed real Dragapult artwork and effects, deck editing, dated guidance, loading a 60-card list, and switching back to One Piece. A final mobile typography refinement also passed the complete local suite.
