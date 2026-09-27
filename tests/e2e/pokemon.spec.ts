@@ -33,3 +33,11 @@ test('corrupt Pokémon saves are preserved and exact text exports retain the dra
  await page.goto('./');await page.getByLabel('Choose card game').selectOption('pokemon');await page.getByRole('button',{name:'Deck builder',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Original storage is preserved');await page.getByRole('button',{name:'Save deck',exact:true}).click();expect(await page.evaluate(()=>localStorage.getItem('tcg-builder.pokemon.decks.v1'))).toBe('broken');
  await page.getByRole('textbox',{name:'Search Pokémon deck cards'}).fill('sv06-130');await page.getByRole('button',{name:'Add Dragapult ex sv06-130 to deck',exact:true}).click();await page.getByRole('button',{name:'Export deck',exact:true}).click();await expect(page.getByRole('textbox',{name:'Pokémon deck list text'})).toHaveValue(/1 sv06-130/);
 });
+
+test('repaired Pokémon subsets render exact card artwork',async({page})=>{
+ await page.goto('./');await page.getByLabel('Choose card game').selectOption('pokemon');
+ for(const [id,name] of [['swsh4.5sv-SV001','Rowlet'],['swsh12.5gg-GG01','Hisuian Voltorb'],['sm7.5-1','Charmander']]){
+  await page.getByRole('textbox',{name:'Search Pokémon cards'}).fill(id);await page.getByRole('button',{name:`View ${name} ${id}`,exact:true}).click();
+  await expect.poll(()=>page.getByRole('dialog').locator('img').evaluate(i=>(i as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);await page.keyboard.press('Escape');
+ }
+});

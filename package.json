@@ -12,8 +12,9 @@
     "update:meta": "node scripts/import-meta.mjs",
     "test:e2e": "playwright test",
     "repair:artwork": "node scripts/repair-artwork.mjs",
-    "update:pokemon": "node scripts/import-pokemon.mjs",
-    "update:pokemon-meta": "node scripts/import-pokemon-meta.mjs"
+    "update:pokemon": "node scripts/import-pokemon.mjs && npm run repair:pokemon-artwork",
+    "update:pokemon-meta": "node scripts/import-pokemon-meta.mjs",
+    "repair:pokemon-artwork": "node scripts/repair-pokemon-artwork.mjs"
   },
   "engines": {
     "node": ">=22.18.0"
