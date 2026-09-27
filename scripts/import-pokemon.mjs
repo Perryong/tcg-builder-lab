@@ -29,7 +29,7 @@ export async function importRepository(root,images){
     if(c.rarity==='Radiant Rare')exceptions[id]={group:'Radiant',groupLimit:1};
     setCards.push(card);
    }
-   if(!setCards.length)continue;cards.push(...setCards);sets.push({id:set.id,name:en(set.name),series:set.serie.id,releaseDate:set.releaseDate??null,sourceUrl:`https://www.tcgdex.net/database/${set.serie.id}/${set.id}`,officialCount:set.cardCount?.official??null,totalCount:setCards.length,importedCount:setCards.length});
+   if(!setCards.length)continue;cards.push(...setCards);sets.push({id:set.id,name:en(set.name),series:set.serie.id,releaseDate:set.releaseDate??null,sourceUrl:`https://www.tcgdex.net/database/${set.serie.id}/${set.id}`,officialCount:set.cardCount?.official??null,totalCount:set.cardCount?.total??null,importedCount:setCards.length});
   }
  }
  sets.sort((a,b)=>(b.releaseDate??'').localeCompare(a.releaseDate??''));const rank=new Map(sets.map((s,i)=>[s.id,i]));cards.sort((a,b)=>rank.get(a.setId)-rank.get(b.setId)||a.localId.localeCompare(b.localId,undefined,{numeric:true}));
