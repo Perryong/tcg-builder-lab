@@ -54,3 +54,18 @@ Eight leader guides provide qualitative strengths, weaknesses, and construction 
 
 Snapshots older than 14 days are labeled stale. Updates are manual commands; no unattended job, account, database, or public hosting was added.
 # tcg-builder-lab
+
+## GitHub Pages and CI/CD
+
+Live site: https://perryong.github.io/tcg-builder-lab/
+
+`.github/workflows/pages.yml` runs on pull requests, pushes to `main`, and manual dispatch. It installs dependencies with `npm ci`, runs unit checks, builds for `/tcg-builder-lab/`, and runs Playwright against the production build. Successful `main` builds deploy the same artifact to GitHub Pages. Pull requests only run checks. Pages uses GitHub Actions as its publishing source; no personal access token is stored in the workflow.
+
+To reproduce the production checks locally:
+
+```sh
+npm run build -- --base=/tcg-builder-lab/
+PLAYWRIGHT_PREVIEW=1 npm run test:e2e
+```
+
+Data snapshots remain manual updates; commit refreshed snapshots to `main` to publish them. Browser-saved decks are specific to the site's origin; use text export/import to move decks from localhost to the hosted site.

@@ -20,9 +20,9 @@ export default function App() {
   const [view, setView] = useState('cards');
   const [menu, setMenu] = useState(false);
   const [notice, setNotice] = useState('');
-  useEffect(()=>{fetch('/data/meta.json').then(r=>{if(!r.ok)throw new Error('Meta evidence could not be loaded.');return r.json();}).then(d=>{if(!Array.isArray(d.events)||!Array.isArray(d.archetypes))throw new Error('Invalid meta snapshot.');setMeta(d);}).catch(e=>setError(e.message));},[]);
-  useEffect(()=>{fetch('/data/rules.json').then(r=>{if(!r.ok)throw new Error('Rules could not be loaded.');return r.json();}).then(setRules).catch(e=>setError(e.message));},[]);
-  useEffect(() => { fetch('/data/catalog.json').then(r => { if (!r.ok) throw new Error('The card library could not be loaded.');return r.json(); }).then(d => setSnapshot(normalizeCatalog(d))).catch(e => setError(e.message)); }, []);
+  useEffect(()=>{fetch(`${import.meta.env.BASE_URL}data/meta.json`).then(r=>{if(!r.ok)throw new Error('Meta evidence could not be loaded.');return r.json();}).then(d=>{if(!Array.isArray(d.events)||!Array.isArray(d.archetypes))throw new Error('Invalid meta snapshot.');setMeta(d);}).catch(e=>setError(e.message));},[]);
+  useEffect(()=>{fetch(`${import.meta.env.BASE_URL}data/rules.json`).then(r=>{if(!r.ok)throw new Error('Rules could not be loaded.');return r.json();}).then(setRules).catch(e=>setError(e.message));},[]);
+  useEffect(() => { fetch(`${import.meta.env.BASE_URL}data/catalog.json`).then(r => { if (!r.ok) throw new Error('The card library could not be loaded.');return r.json(); }).then(d => setSnapshot(normalizeCatalog(d))).catch(e => setError(e.message)); }, []);
   useEffect(() => { if (!notice) return;const t=setTimeout(() => setNotice(''),4000);return ()=>clearTimeout(t); }, [notice]);
   const navigate=(next:string)=>{setView(next);setMenu(false);window.scrollTo({top:0});};
   const onAdd=(card:Card)=>{

@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 test('card filters, exact artwork, and leader details work',async({page})=>{
- await page.goto('/');
+ await page.goto('./');
  await page.getByRole('textbox',{name:'Search cards or sets'}).fill('OP17-001');
  await expect(page.locator('.card-tile')).toHaveCount(1);
  await page.getByRole('button',{name:'View Edward.Newgate OP17-001',exact:true}).click();
@@ -19,7 +19,7 @@ test('card filters, exact artwork, and leader details work',async({page})=>{
  await expect.poll(()=>page.locator('.card-tile img').evaluate(i=>(i as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });
 test('deck editing, leader exceptions, saving, and import validation work',async({page})=>{
- await page.goto('/');await page.getByRole('button',{name:'Deck builder',exact:true}).click();
+ await page.goto('./');await page.getByRole('button',{name:'Deck builder',exact:true}).click();
  await page.getByLabel('Choose leader',{exact:true}).selectOption('OP15-058');
  await expect(page.getByRole('spinbutton',{name:'DON card count'})).toHaveValue('6');
  await page.getByRole('textbox',{name:'Deck name'}).fill('Playwright crew');
@@ -40,7 +40,7 @@ test('deck editing, leader exceptions, saving, and import validation work',async
  await expect(page.getByRole('textbox',{name:'Deck list text'})).toHaveValue(/1 OP15-058[\s\S]*1 OP15-061[\s\S]*6 DON!!/);
 });
 test('meta results keep regions separate and source lists load into builder',async({page})=>{
- await page.goto('/');await page.getByRole('button',{name:'Meta & insights',exact:true}).click();
+ await page.goto('./');await page.getByRole('button',{name:'Meta & insights',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Read the meta.'})).toBeVisible();
  await expect(page.locator('.results-table tbody tr')).not.toHaveCount(0);
  await expect(page.locator('.results-table tbody')).not.toContainText('JP');
@@ -52,7 +52,7 @@ test('meta results keep regions separate and source lists load into builder',asy
  await expect(page.locator('.deck-count-line')).toContainText('50');
 });
 test('mobile layout has no horizontal overflow and navigation remains usable',async({page})=>{
- await page.setViewportSize({width:390,height:844});await page.goto('/');
+ await page.setViewportSize({width:390,height:844});await page.goto('./');
  await expect(page.getByRole('heading',{name:'Your next great deck starts here.'})).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.getByRole('button',{name:'Open navigation'}).click();
@@ -61,7 +61,7 @@ test('mobile layout has no horizontal overflow and navigation remains usable',as
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 test('clearing a leader and replacing an empty edited draft are safe',async({page})=>{
- await page.goto('/');await page.getByRole('button',{name:'Deck builder',exact:true}).click();
+ await page.goto('./');await page.getByRole('button',{name:'Deck builder',exact:true}).click();
  await page.getByLabel('Choose leader',{exact:true}).selectOption('OP15-058');
  await page.getByLabel('Choose leader',{exact:true}).selectOption('');
  await expect(page.getByLabel('Choose leader',{exact:true})).toHaveValue('');
