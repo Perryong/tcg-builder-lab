@@ -42,3 +42,16 @@ test('public artwork links match exact variants and missing art is marked unavai
  assert.equal(mapped.cards[0].imageUrl,'https://optcgapi.com/media/static/Card_Images/OP01-001.jpg');
  assert.equal(mapped.cards[1].artworkAvailable,false);
 });
+test('official leaders use the shared cost class for Life, not a playable cost',()=>{
+ const html='<dl class="modalCol" id="OP17-001"><div class="infoCol"><span>OP17-001</span><span>L</span><span>LEADER</span></div><div class="cardName">Edward.Newgate</div><div class="frontCol"><img data-src="../images/cardlist/card/OP17-001.png"></div><div class="cost"><h3>Life</h3>5</div><div class="color"><h3>Color</h3>Red</div></dl>';
+ const [leader]=importer.parseCards(html,snapshot.sets[0]);
+ assert.equal(leader.life,5);assert.equal(leader.cost,null);
+});
+test('alternate artwork shares base gameplay stats despite source transcription errors',()=>{
+ const base={...c,id:'OP-01:OP01-001',power:12000,counter:null};
+ const variant={...base,id:'OP-01:OP01-001_p3',power:null,counter:12000};
+ const result=catalog.normalizeCatalog({...snapshot,cards:[variant,base]});
+ assert.equal(result.cards[0].power,12000);
+ assert.equal(result.cards[0].counter,null);
+ assert.equal(result.cards[0].id,variant.id);
+});

@@ -31,7 +31,7 @@ export function parseCards(html, set) {
     return {
       id: `${set.code}:${id}`, number: info[0], setCode: set.code, name: clean(node.find('.cardName').text()),
       colors: value('.color').split(/[\/\s]+/).filter(Boolean), type: info[2], rarity: info[1],
-      cost: num('.cost'), power: num('.power'), counter: num('.counter'), life: num('.life'),
+      cost: node.find('.cost h3').text().trim() === 'Life' ? null : num('.cost'), power: num('.power'), counter: num('.counter'), life: num('.life') ?? (node.find('.cost h3').text().trim() === 'Life' ? num('.cost') : null),
       traits: value('.feature').split('/').filter(Boolean), text: value('.text'), trigger: value('.trigger'),
       imageUrl: new URL(image.attr('data-src') ?? image.attr('src'), base).href,
       sourceUrl: `${set.sourceUrl}#${id}`, block: value('.block') || null, attribute: value('.attribute')
@@ -39,9 +39,9 @@ export function parseCards(html, set) {
   });
 }
 export async function publishCatalog(path, candidate) {
-  normalizeCatalog(candidate);
+  const normalized = normalizeCatalog(candidate);
   const temporary = `${path}.${crypto.randomUUID()}.tmp`;
-  await writeFile(temporary, JSON.stringify(candidate));
+  await writeFile(temporary, JSON.stringify(normalized));
   await rename(temporary, path);
 }
 export function attachArtwork(snapshot, imageRecords) {

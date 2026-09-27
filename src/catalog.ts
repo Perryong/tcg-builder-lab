@@ -19,7 +19,12 @@ export function normalizeCatalog(raw: unknown): CatalogSnapshot {
     }
     ids.add(card.id);
   }
-  return data;
+  // Artwork variants share gameplay stats; the source occasionally mislabels a variant's values.
+  const bases = new Map(data.cards.filter(c => c.id.split(':').at(-1) === c.number).map(c => [`${c.setCode}:${c.number}`, c]));
+  return {...data, cards:data.cards.map(card => {
+    const base=bases.get(`${card.setCode}:${card.number}`);
+    return base ? {...card,cost:base.cost,power:base.power,counter:base.counter,life:base.life} : card;
+  })};
 }
 export function setCounts(cards: Card[], setCode: string): { uniqueCards: number; artworks: number } {
   const set = cards.filter(c => c.setCode === setCode);

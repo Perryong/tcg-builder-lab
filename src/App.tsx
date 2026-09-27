@@ -32,7 +32,7 @@ export default function App() {
   };
   const useList=(event:EventRecord)=>{
     if(!event.list)return;
-    if(dirty && Object.keys(deck.cards).length && !window.confirm('Open this tournament list as a new deck? Unsaved draft changes will be replaced.'))return;
+    if(dirty && !window.confirm('Open this tournament list as a new deck? Unsaved draft changes will be replaced.'))return;
     setDeck({...newDeck(),name:`${event.player}'s ${snapshot?.cards.find(c=>c.number===event.leaderNumber)?.name??'crew'}`,leaderNumber:event.leaderNumber,cards:{...event.list},donCount:rules?.leaderExceptions[event.leaderNumber]?.donCount??10});
     setNotice(`Loaded sourced list from ${event.date}. Check your event's format before playing.`);navigate('deck');
   };

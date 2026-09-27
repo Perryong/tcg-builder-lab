@@ -48,14 +48,14 @@
 
 **Interfaces:** Export `Card`, `SetRecord`, and `CatalogSnapshot` from `src/data.ts`. Card records use a stable `id` for each printing, `number` for gameplay identity, `setCode`, `name`, `colors`, `type`, `rarity`, nullable `cost`, `power`, `counter`, and `life`, `traits`, `text`, `imageUrl`, and `sourceUrl`. The snapshot includes `region`, `checkedAt`, `coverage: 'partial' | 'complete'`, `coverageNotes`, `sets`, and `cards`.
 
-- [ ] Inspect the official Asia catalog, product listing, access terms, and image access. Record chosen URLs and actual source coverage in README. If the source is unusable, document the blocker and use only verifiable accessible records with partial coverage.
-- [ ] Set up Vite/React/TypeScript and a Node test command using a supported installed Node version. Pin installed dependency versions in a lockfile. Initialize Git if needed; do not create a second checkout for an empty project.
-- [ ] Write failing checks in `tests/catalog.test.ts`: two artwork records with the same number give one unique card and two illustrations; missing numeric metadata remains null; a malformed import cannot replace a valid snapshot.
-- [ ] Run `npm test -- tests/catalog.test.ts`; confirm the assertions fail before implementation.
-- [ ] Implement `normalizeCatalog(raw: unknown): CatalogSnapshot` and `setCounts(cards: Card[], setCode: string): { uniqueCards: number; artworks: number }` in `src/catalog.ts`. Reject invalid identifiers and unsafe source/image URLs at ingestion.
-- [ ] Implement `scripts/import-catalog.mjs`: download using the verified source method, validate the entire candidate, write a temporary snapshot, and rename only after success. Use bounded requests and explicit errors. Add `npm run update:catalog`.
-- [ ] Import accessible sets and card images; reconcile imported counts against the source and record omissions. Do not mark partial imports complete.
-- [ ] Run catalog tests and the import command; confirm snapshot metadata and counts. Commit the catalog deliverable and tooling.
+- [x] Inspect the official Asia catalog, product listing, access terms, and image access. Record chosen URLs and actual source coverage in README. If the source is unusable, document the blocker and use only verifiable accessible records with partial coverage.
+- [x] Set up Vite/React/TypeScript and a Node test command using a supported installed Node version. Pin installed dependency versions in a lockfile. Initialize Git if needed; do not create a second checkout for an empty project.
+- [x] Write failing checks in `tests/catalog.test.ts`: two artwork records with the same number give one unique card and two illustrations; missing numeric metadata remains null; a malformed import cannot replace a valid snapshot.
+- [x] Run `npm test -- tests/catalog.test.ts`; confirm the assertions fail before implementation.
+- [x] Implement `normalizeCatalog(raw: unknown): CatalogSnapshot` and `setCounts(cards: Card[], setCode: string): { uniqueCards: number; artworks: number }` in `src/catalog.ts`. Reject invalid identifiers and unsafe source/image URLs at ingestion.
+- [x] Implement `scripts/import-catalog.mjs`: download using the verified source method, validate the entire candidate, write a temporary snapshot, and rename only after success. Use bounded requests and explicit errors. Add `npm run update:catalog`.
+- [x] Import accessible sets and card images; reconcile imported counts against the source and record omissions. Do not mark partial imports complete.
+- [x] Run catalog tests and the import command; confirm snapshot metadata and counts. Commit the catalog deliverable and tooling.
 
 ## Task 2: Illustrated catalog application
 
@@ -63,11 +63,11 @@
 
 **Produces:** `filterCards(cards: Card[], query: { search: string; setCode: string; color: string; type: string; rarity: string; cost: string }): Card[]` in `src/catalog.ts`; `Catalog` React view receives `snapshot` and optional `onAdd(card: Card)`.
 
-- [ ] Add a failing catalog check: combined set/color/text filters intersect; search matches card number and name case-insensitively; numeric cost zero is searchable.
-- [ ] Run the catalog check and confirm failure, then implement `filterCards`.
-- [ ] Build `src/main.tsx`, `src/App.tsx`, and `src/styles.css` with Cards & Sets, Deck Builder, and Meta navigation, a visible Asia region label, and local snapshot loading/error states.
-- [ ] Build `src/Catalog.tsx`: illustrated card grid, filters, set list and counts, and keyboard-accessible card detail dialog. Include artwork selection, all specified card fields, source links, import date, and coverage notice. Use a placeholder for failed image loads.
-- [ ] Verify search/filter checks, run `npm run build`, and inspect catalog on desktop and mobile with keyboard navigation. Commit the catalog UI.
+- [x] Add a failing catalog check: combined set/color/text filters intersect; search matches card number and name case-insensitively; numeric cost zero is searchable.
+- [x] Run the catalog check and confirm failure, then implement `filterCards`.
+- [x] Build `src/main.tsx`, `src/App.tsx`, and `src/styles.css` with Cards & Sets, Deck Builder, and Meta navigation, a visible Asia region label, and local snapshot loading/error states.
+- [x] Build `src/Catalog.tsx`: illustrated card grid, filters, set list and counts, and keyboard-accessible card detail dialog. Include artwork selection, all specified card fields, source links, import date, and coverage notice. Use a placeholder for failed image loads.
+- [x] Verify search/filter checks, run `npm run build`, and inspect catalog on desktop and mobile with keyboard navigation. Commit the catalog UI.
 
 ## Task 3: Deck building and regional legality
 
@@ -75,11 +75,11 @@
 
 **Produces:** `Deck = { id: string; name: string; leaderNumber: string | null; cards: Record<string, number>; donCount: number }`. Export `validateDeck(deck: Deck, cards: Card[], rules: RulesSnapshot, date: string): { issues: string[]; status: 'valid' | 'invalid' | 'unverified' }`, `parseDeck(text: string, cards: Card[]): Deck`, `exportDeck(deck: Deck): string`, `loadDecks(storage: Storage): { decks: Deck[]; error: string | null }`, and `saveDecks(storage: Storage, decks: Deck[]): { error: string | null }` from `src/deck.ts`. Define `RulesSnapshot` in `src/data.ts` with region, source URLs, check date, verified limits, explicit exceptions, and restrictions containing effective dates.
 
-- [ ] Verify leader/main/DON!! requirements, copy limits, color rules, card exceptions, and current Asia restrictions against official documentation. Save sourced rules in `public/data/rules.json`; leave unverified requirements explicit.
-- [ ] Write failing `tests/deck.test.ts` checks for valid verified decks, wrong sizes, incompatible colors, alternate-art copy aggregation, banned cards before/after effective dates, special exceptions, absent rules, malformed quantities, unknown cards, import/export roundtrip, broken stored JSON, and storage write failure.
-- [ ] Run deck tests and confirm failure, then implement the listed deck functions. Parse complete input before accepting it; preserve existing decks when import or storage fails.
-- [ ] Build `src/DeckBuilder.tsx`: leader selection, catalog add action, quantity controls, legality issues, deck total, DON!! count, cost distribution, deck naming, saved-deck selector, and text import/export. Save edited deck state with visible failure feedback.
-- [ ] Run deck tests and production build. Manually build a deck, refresh, reload it, and export/import it. Commit the deck builder.
+- [x] Verify leader/main/DON!! requirements, copy limits, color rules, card exceptions, and current Asia restrictions against official documentation. Save sourced rules in `public/data/rules.json`; leave unverified requirements explicit.
+- [x] Write failing `tests/deck.test.ts` checks for valid verified decks, wrong sizes, incompatible colors, alternate-art copy aggregation, banned cards before/after effective dates, special exceptions, absent rules, malformed quantities, unknown cards, import/export roundtrip, broken stored JSON, and storage write failure.
+- [x] Run deck tests and confirm failure, then implement the listed deck functions. Parse complete input before accepting it; preserve existing decks when import or storage fails.
+- [x] Build `src/DeckBuilder.tsx`: leader selection, catalog add action, quantity controls, legality issues, deck total, DON!! count, cost distribution, deck naming, saved-deck selector, and text import/export. Save edited deck state with visible failure feedback.
+- [x] Run deck tests and production build. Manually build a deck, refresh, reload it, and export/import it. Commit the deck builder.
 
 ## Task 4: Sourced meta and deck guidance
 
@@ -87,22 +87,26 @@
 
 **Produces:** `MetaSnapshot` in `src/data.ts` includes `checkedAt`, region, coverage notes, event records, and archetype notes. Each event records date, region, source URL, placement, leader, and optional sourced list. Each strategy note includes source URLs and explicitly qualitative strengths/weaknesses. Export `selectEvidence(snapshot: MetaSnapshot, region: string, from: string, to: string): EventRecord[]` and `analyzeDeck(deck: Deck, cards: Card[], snapshot: MetaSnapshot): { observations: string[]; archetypeNotes: ArchetypeNote | null }` from `src/meta.ts`.
 
-- [ ] Research accessible recent Asia tournament evidence and attributed strategic explanations. Record event dates and regions; avoid copying unsourced lists or inferring numerical matchup rates.
-- [ ] Write failing `tests/meta.test.ts` checks: exclude wrong-region and outside-window results; no data yields no rankings; incomplete/custom decks produce structural observations without invented scores; missing counter values are not treated as known zero.
-- [ ] Run meta checks and confirm failure, then implement evidence selection and structural analysis. Return archetype guidance only for a supported matching leader and label it as archetype guidance rather than a bespoke matchup prediction.
-- [ ] Implement `scripts/import-meta.mjs` to validate curated sourced records and atomically update `public/data/meta.json`. Add `npm run update:meta`; retain prior data on errors.
-- [ ] Build `src/Meta.tsx` with event evidence, source links, date-window controls, last-check timestamp, and archetype strategy notes. Link saved decks to their structural analysis. Define stale UI as a last check more than 14 days ago; always show event dates. When source coverage is missing, use an honest empty state.
-- [ ] If showing popularity, count only eligible recorded lists and label it as share of the collected sample, displaying the denominator and window. Never label it a global win rate.
-- [ ] Run meta tests and build; inspect populated, empty, stale, and failed-refresh states. Commit the meta view and update tooling.
+- [x] Research accessible recent Asia tournament evidence and attributed strategic explanations. Record event dates and regions; avoid copying unsourced lists or inferring numerical matchup rates.
+- [x] Write failing `tests/meta.test.ts` checks: exclude wrong-region and outside-window results; no data yields no rankings; incomplete/custom decks produce structural observations without invented scores; missing counter values are not treated as known zero.
+- [x] Run meta checks and confirm failure, then implement evidence selection and structural analysis. Return archetype guidance only for a supported matching leader and label it as archetype guidance rather than a bespoke matchup prediction.
+- [x] Implement `scripts/import-meta.mjs` to validate curated sourced records and atomically update `public/data/meta.json`. Add `npm run update:meta`; retain prior data on errors.
+- [x] Build `src/Meta.tsx` with event evidence, source links, date-window controls, last-check timestamp, and archetype strategy notes. Link saved decks to their structural analysis. Define stale UI as a last check more than 14 days ago; always show event dates. When source coverage is missing, use an honest empty state.
+- [x] If showing popularity, count only eligible recorded lists and label it as share of the collected sample, displaying the denominator and window. Never label it a global win rate.
+- [x] Run meta tests and build; inspect populated, empty, stale, and failed-refresh states. Commit the meta view and update tooling.
 
 ## Task 5: Integrated verification and local handoff
 
-- [ ] Run `npm test` and `npm run build`; address failures before claiming completion.
-- [ ] Start the app and inspect all three views at desktop and mobile widths; verify keyboard operation, detail dialogs, loading/errors, card-to-deck navigation, persisted decks, and source/coverage labels.
-- [ ] Attempt a bad catalog update and bad meta update; verify the prior good snapshots remain unchanged.
-- [ ] Write README instructions for `npm install`, `npm run dev`, `npm test`, `npm run build`, `npm run update:catalog`, and `npm run update:meta`, including verified coverage and remaining external data limitations.
-- [ ] Perform whole-change review using Superpowers' requesting-code-review and verification-before-completion workflows. Commit final corrections and report the local preview, checks, and data coverage. Public deployment remains outside this local release.
+- [x] Run `npm test` and `npm run build`; address failures before claiming completion.
+- [x] Start the app and inspect all three views at desktop and mobile widths; verify keyboard operation, detail dialogs, loading/errors, card-to-deck navigation, persisted decks, and source/coverage labels.
+- [x] Attempt a bad catalog update and bad meta update; verify the prior good snapshots remain unchanged.
+- [x] Write README instructions for `npm install`, `npm run dev`, `npm test`, `npm run build`, `npm run update:catalog`, and `npm run update:meta`, including verified coverage and remaining external data limitations.
+- [x] Perform whole-change review using Superpowers' requesting-code-review and verification-before-completion workflows. Commit final corrections and report the local preview, checks, and data coverage. Public deployment remains outside this local release.
 
 ## Plan self-review
 
 Catalog, artwork counts, regional legality, local persistence, sourced meta, update failures, accessibility, and desktop/mobile verification each have an owning task. Shared types and function signatures are defined above. External source discovery is explicitly the first step rather than an assumed completed integration. Every Review Focus item has a check in its owning task.
+
+## Completion — September 27, 2026
+
+All five tasks completed locally. Final checks: 22 unit checks, five Playwright browser flows, production build. Review found three issues; alternate-art numeric stats, clearing leader selection, and empty draft replacement protection now have regression checks. See the implementation report for coverage and execution rulings.
