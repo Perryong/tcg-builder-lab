@@ -36,7 +36,7 @@ test('corrupt Pokémon saves are preserved and exact text exports retain the dra
 
 test('repaired Pokémon subsets render exact card artwork',async({page})=>{
  await page.goto('./');await page.getByLabel('Choose card game').selectOption('pokemon');
- for(const [id,name] of [['swsh4.5sv-SV001','Rowlet'],['swsh12.5gg-GG01','Hisuian Voltorb'],['sm7.5-1','Charmander'],['xyp-XY46','Xerneas']]){
+ for(const [id,name] of [['swsh4.5sv-SV001','Rowlet'],['swsh12.5gg-GG01','Hisuian Voltorb'],['sm7.5-1','Charmander'],['xyp-XY46','Altaria']]){
   await page.getByRole('textbox',{name:'Search Pokémon cards'}).fill(id);await page.getByRole('button',{name:`View ${name} ${id}`,exact:true}).click();
   await expect.poll(()=>page.getByRole('dialog').locator('img').evaluate(i=>(i as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);await page.keyboard.press('Escape');
  }
