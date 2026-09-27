@@ -4,7 +4,7 @@ export function newPokemonDeck():PokemonDeck{return {id:crypto.randomUUID(),name
 export function pokemonEligibility(card:PokemonCard,cards:PokemonCard[],rules:PokemonRules,date:string):{status:'eligible'|'ineligible'|'unknown';reason:string}{
  const banned=rules.bans.some(b=>b.effectiveFrom<=date&&b.cardIds.includes(card.id));if(banned)return {status:'ineligible',reason:'Banned in this rules snapshot.'};
  if(card.category==='Energy'&&card.energyType==='Basic')return {status:'eligible',reason:'Basic Energy is permitted.'};
- const equivalent=cards.find(c=>c.id===rules.reprints[card.id]);const c=equivalent??card;
+ const equivalent=rules.reprints[card.id]?cards.find(c=>c.id===rules.reprints[card.id]):undefined;const c=equivalent??card;
  if(!c.releaseDate)return {status:'unknown',reason:'Release eligibility unavailable.'};
  if(Date.parse(c.releaseDate)+14*86400000>Date.parse(date))return {status:'ineligible',reason:'Not yet eligible under the two-week release rule.'};
  const rotation=rules.rotations.filter(r=>r.effectiveFrom<=date).sort((a,b)=>b.effectiveFrom.localeCompare(a.effectiveFrom))[0];

@@ -3,7 +3,7 @@ import { ArrowDownWideNarrow, ArrowRight, Check, ChevronLeft, ChevronRight, Exte
 import type { Card, CatalogSnapshot } from './data.ts';
 import { colors, filterCards, setCounts } from './catalog.ts';
 import type { CardQuery } from './catalog.ts';
-export function CardImage({ card, className = '' }: { card: Card; className?: string }) {
+export function CardImage({ card, className = '' }: { card: Pick<Card,'name'|'number'|'imageUrl'|'artworkAvailable'>; className?: string }) {
   const [failed, setFailed] = useState(card.artworkAvailable === false);
   useEffect(() => setFailed(card.artworkAvailable === false), [card.imageUrl, card.artworkAvailable]);
   return failed ? <div className={`art-placeholder ${className}`}><Layers3 size={32}/><span>{card.name}</span><small>Artwork unavailable</small></div> : <img className={`card-image ${className}`} src={card.imageUrl} alt={`${card.name} · ${card.number}`} loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(true)}/>;
