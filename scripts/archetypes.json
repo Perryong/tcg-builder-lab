@@ -1,0 +1,194 @@
+[
+  {
+    "leaderNumber": "OP17-039",
+    "title": "Rocks Pirates",
+    "style": "Draw & synergy",
+    "gamePlan": "Attack to turn a spare hand card into a chance at drawing two. A high Rocks Pirates density makes the reveal more dependable.",
+    "strengths": [
+      "Leader draw can replenish your hand.",
+      "A focused tribe rewards a coherent card package."
+    ],
+    "weaknesses": [
+      "A missed reveal costs a hand card.",
+      "Off-tribe tech choices reduce reveal consistency."
+    ],
+    "suggestions": [
+      "Compare Rocks Pirates density with a recent sourced list.",
+      "Review off-tribe slots before adding more situational tech."
+    ],
+    "sourceUrls": [
+      "https://asia-en.onepiece-cardgame.com/cardlist/?series=556117#OP17-039"
+    ],
+    "publishedAt": "2026-09-27",
+    "region": "Asia",
+    "basis": "card-analysis"
+  },
+  {
+    "leaderNumber": "OP14-020",
+    "title": "Green Mihawk",
+    "style": "Resource & control",
+    "gamePlan": "Sequence Characters first, then use the Leader to reactivate DON!! for later actions. The ability locks further Character plays for that turn.",
+    "strengths": [
+      "Reactivating DON!! extends your available resources.",
+      "Leader gains power against Slash Leaders."
+    ],
+    "weaknesses": [
+      "Using the ability too early prevents further Character deployment.",
+      "This leader is announced banned from October 12, 2026."
+    ],
+    "suggestions": [
+      "Plan an alternative leader before the October 12 restriction.",
+      "Check your turn sequence before activating the Leader."
+    ],
+    "sourceUrls": [
+      "https://asia-en.onepiece-cardgame.com/cardlist/?series=556114#OP14-020"
+    ],
+    "publishedAt": "2026-09-27",
+    "region": "Asia",
+    "basis": "card-analysis"
+  },
+  {
+    "leaderNumber": "OP16-001",
+    "title": "Red Ace",
+    "style": "Rush & pressure",
+    "gamePlan": "Build around high-power Luffy and Whitebeard Pirates bodies, then use the Leader to grant Rush and apply immediate pressure.",
+    "strengths": [
+      "Qualifying big bodies can attack the turn they arrive.",
+      "The Leader gives an explicit tribe and power target for deck building."
+    ],
+    "weaknesses": [
+      "The Rush effect requires a qualifying 8000-power body.",
+      "Too many expensive bodies can leave an awkward early hand."
+    ],
+    "suggestions": [
+      "Count qualifying Luffy and Whitebeard Pirates cards.",
+      "Balance high-power threats with early plays and defensive counters."
+    ],
+    "sourceUrls": [
+      "https://asia-en.onepiece-cardgame.com/cardlist/?series=556116#OP16-001"
+    ],
+    "publishedAt": "2026-09-27",
+    "region": "Asia",
+    "basis": "card-analysis"
+  },
+  {
+    "leaderNumber": "OP17-079",
+    "title": "Elbaph Luffy",
+    "style": "Big bodies & defense",
+    "gamePlan": "Use Characters with cost 12 or more to unlock the Leader-granted Blocker effect. Check how your list gets those bodies onto the field.",
+    "strengths": [
+      "Expensive Characters also become defensive bodies.",
+      "One leader effect can protect a board of qualifying threats."
+    ],
+    "weaknesses": [
+      "The Leader gives no Blocker bonus to smaller Characters.",
+      "A hand full of expensive cards needs a realistic early-game plan."
+    ],
+    "suggestions": [
+      "Review your early curve before adding more top-end cards.",
+      "Compare ways to deploy qualifying Characters in a sourced list."
+    ],
+    "sourceUrls": [
+      "https://asia-en.onepiece-cardgame.com/cardlist/?series=556117#OP17-079"
+    ],
+    "publishedAt": "2026-09-27",
+    "region": "Asia",
+    "basis": "card-analysis"
+  },
+  {
+    "leaderNumber": "OP08-058",
+    "title": "Purple Yellow Pudding",
+    "style": "Ramp & life",
+    "gamePlan": "Turn two Life cards face-up while attacking to add a rested DON!! card. Plan how ramp and face-up Life interact with the rest of the list.",
+    "strengths": [
+      "Attacking can accelerate your resources.",
+      "Two colors give access to a broader card pool."
+    ],
+    "weaknesses": [
+      "The ramp action requires two Life cards to turn face-up.",
+      "Extra DON!! enters rested, so it does not immediately pay normal costs."
+    ],
+    "suggestions": [
+      "Check your early defensive options before leaning into expensive threats.",
+      "Compare ramp timing and Life support with a recent event list."
+    ],
+    "sourceUrls": [
+      "https://asia-en.onepiece-cardgame.com/cardlist/?series=556202#OP08-058_p2"
+    ],
+    "publishedAt": "2026-09-27",
+    "region": "Asia",
+    "basis": "card-analysis"
+  },
+  {
+    "leaderNumber": "OP15-058",
+    "title": "Purple Enel",
+    "style": "Six-DON engine",
+    "gamePlan": "Build for a six-card DON!! deck and use the Leader from your second turn to accelerate and allocate resources to a Character.",
+    "strengths": [
+      "Leader rapidly develops and allocates DON!!.",
+      "A repeatable resource plan gives your deck a clear engine."
+    ],
+    "weaknesses": [
+      "You must build around six DON!! rather than ten.",
+      "The main ability does not start until your second turn."
+    ],
+    "suggestions": [
+      "Keep the DON!! deck at exactly six cards.",
+      "Check that planned normal plays fit the six-DON ceiling."
+    ],
+    "sourceUrls": [
+      "https://asia-en.onepiece-cardgame.com/cardlist/?series=556115#OP15-058"
+    ],
+    "publishedAt": "2026-09-27",
+    "region": "Asia",
+    "basis": "card-analysis"
+  },
+  {
+    "leaderNumber": "ST30-001",
+    "title": "Luffy & Ace",
+    "style": "Defensive crew",
+    "gamePlan": "Use named Ace and Luffy cards to benefit from the opponent-turn power bonus, while accounting for the Leader power reduction when a large body is present.",
+    "strengths": [
+      "Named Ace and Luffy cards gain defensive power.",
+      "Red and green offer different ways to support your crew."
+    ],
+    "weaknesses": [
+      "A 7000-power Character reduces the Leader power.",
+      "Unrelated named Characters miss the defensive bonus."
+    ],
+    "suggestions": [
+      "Count the Ace and Luffy cards that receive the bonus.",
+      "Plan defensive counters for turns when your Leader power is reduced."
+    ],
+    "sourceUrls": [
+      "https://asia-en.onepiece-cardgame.com/cardlist/?series=556030#ST30-001"
+    ],
+    "publishedAt": "2026-09-27",
+    "region": "Asia",
+    "basis": "card-analysis"
+  },
+  {
+    "leaderNumber": "OP09-062",
+    "title": "Nico Robin",
+    "style": "Banish & ramp",
+    "gamePlan": "Attack with Banish and use Trigger cards from hand to ramp. Balance that resource gain against the cards you give up.",
+    "strengths": [
+      "Leader damage avoids Life Triggers through Banish.",
+      "Attacking can accelerate DON!! development."
+    ],
+    "weaknesses": [
+      "Ramping consumes a Trigger card from hand.",
+      "The extra DON!! is rested rather than immediately active."
+    ],
+    "suggestions": [
+      "Track the supply of Trigger cards in your list.",
+      "Balance late-game threats with defensive options that preserve your hand."
+    ],
+    "sourceUrls": [
+      "https://asia-en.onepiece-cardgame.com/cardlist/?series=556109#OP09-062"
+    ],
+    "publishedAt": "2026-09-27",
+    "region": "Asia",
+    "basis": "card-analysis"
+  }
+]

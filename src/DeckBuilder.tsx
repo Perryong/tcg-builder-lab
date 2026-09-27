@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { AlertCircle, ArrowDownToLine, ArrowRight, Check, Copy, ExternalLink, FileUp, Layers3, Minus, Plus, Save, Search, ShieldCheck, X } from 'lucide-react';
-import type { Card, MetaSnapshot, RulesSnapshot } from './data.ts';
+import type { Card, RulesSnapshot } from './data.ts';
 import type { Deck } from './deck.ts';
 import { exportDeck, parseDeck, validateDeck } from './deck.ts';
 import { CardDetail, CardImage, ColorDots } from './Catalog.tsx';
