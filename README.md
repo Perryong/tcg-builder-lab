@@ -69,3 +69,22 @@ PLAYWRIGHT_PREVIEW=1 npm run test:e2e
 ```
 
 Data snapshots remain manual updates; commit refreshed snapshots to `main` to publish them. Browser-saved decks are specific to the site's origin; use text export/import to move decks from localhost to the hosted site.
+
+## Pokémon support
+
+Choose **Pokémon** in the game selector to explore 21,290 English physical card printings in 201 set groups, with 19,508 remote artwork links. Pokémon TCG Pocket is excluded. The catalog comes from a pinned TCGdex public metadata repository revision recorded in the snapshot; counts describe available source records, not certified worldwide completeness. Missing images and untranslated/omitted records remain explicit limitations. Foil finishes do not inflate artwork counts.
+
+The Pokémon builder checks 60 cards, Basic Pokémon, copy limits across official card names, Basic Energy exceptions, sourced ACE SPEC/Radiant limits, regulation marks and dated rotation. English international Standard is the default. Equivalent reprint/errata mappings, individual promo releases, complete restrictions and event-specific rules are not fully verified; structural checks do not certify tournament legality. Older same-name printings are not automatically granted eligibility. Ambiguous upstream Energy metadata remains unknown rather than receiving the Basic Energy exception.
+
+Pokémon saves use a separate browser storage key; One Piece saves are preserved. Both unsaved drafts survive switching games within the session. Save explicitly or export before closing/reloading. Text imports accept exact quantity-plus-card-ID lines and verified set-code/collector-number lines with matching names. Unknown or ambiguous printings are rejected, without replacing the draft.
+
+The initial Pokémon meta sample contains 64 top-16 Masters records from four completed August/September 2026 events, with international Standard and Japan Standard separated. Sixty lists resolve to known 60-card decks; four retain source links without a load action. Nine guides explain printed-card strategy and trade-offs, labeled qualitative analysis. Sample shares are not global rankings or win rates. Unsupported custom decks receive limited structural observations.
+
+```sh
+npm run update:pokemon
+npm run update:pokemon-meta
+```
+
+The catalog updater clones a single upstream revision, interprets literal metadata without executing upstream code, fetches the artwork manifest, validates counts and publishes atomically. `POKEMON_SOURCE=/path/to/cards-database` can select an existing checkout; its revision is recorded. Catalog import also writes candidate construction exceptions to `scripts/pokemon-exceptions.json`; review and copy updated exceptions into the dated rules snapshot when refreshing rules. Meta import checks source totals and exact printing mappings before allowing deck loading. Failed commands preserve the previous catalog/evidence. Rules dates are not refreshed automatically merely because data was downloaded.
+
+Sources: [TCGdex metadata](https://github.com/tcgdex/cards-database), [TCGdex assets](https://tcgdex.dev/assets), [official Pokémon rules](https://play.pokemon.com/en-us/resources/rules/), [Limitless tournaments](https://limitlesstcg.com/tournaments). Pokémon images/text remain copyright Pokémon, Nintendo, Creatures and GAME FREAK. Metadata licensing does not grant artwork ownership. This site is an unofficial fan companion.

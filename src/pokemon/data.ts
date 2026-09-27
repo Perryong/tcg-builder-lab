@@ -3,6 +3,6 @@ export type PokemonSet={id:string;name:string;series:string;releaseDate:string|n
 export type PokemonCatalog={checkedAt:string;sourceRevision:string;coverageNotes:string;sets:PokemonSet[];cards:PokemonCard[]};
 export type PokemonRules={checkedAt:string;sourceUrls:string[];verified:boolean;rotations:{effectiveFrom:string;allowedMarks:string[]}[];bans:{cardIds:string[];effectiveFrom:string}[];reprints:Record<string,string>;exceptions:Record<string,{copyLimit?:number;group?:string;groupLimit?:number}>;notes:string[]};
 export type PokemonDeck={id:string;name:string;cards:Record<string,number>};
-export type PokemonEvent={id:string;name:string;date:string;format:'standard'|'standard-jp'|'expanded'|'pocket'|'unknown';division:'Masters'|'Seniors'|'Juniors'|'unknown';region:string;country:string;player:string;placement:string;archetypeId:string;sourceUrl:string;list:Record<string,number>|null};
+export type PokemonEvent={id:string;name:string;date:string;format:'standard'|'standard-jp'|'expanded'|'pocket'|'unknown';division:'Masters'|'Seniors'|'Juniors'|'unknown';region:string;country:string;player:string;placement:string;archetypeId:string;archetypeName?:string;sourceUrl:string;list:Record<string,number>|null};
 export type PokemonGuide={id:string;title:string;publishedAt:string;sourceUrls:string[];signatureCards:string[];gamePlan:string;strengths:string[];weaknesses:string[];suggestions:string[]};
 export type PokemonMeta={checkedAt:string;coverageNotes:string;events:PokemonEvent[];guides:PokemonGuide[]};
