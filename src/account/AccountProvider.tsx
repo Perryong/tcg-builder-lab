@@ -3,28 +3,33 @@ import type {ReactNode} from 'react';
 import {accountClient} from './client.ts';
 import {clearPending,mergeDecks,queueDeck,readAccountCache,sameDeck,writeAccountCache} from './sync.ts';
 import type {DeckByGame,Game} from './sync.ts';
-import {loadDecks} from '../deck.ts';
-import {loadPokemonDecks} from '../pokemon/deck.ts';
-import {loadYugiohDecks} from '../yugioh/deck.ts';
+import {loadDecks,storageKey as onePieceStorageKey} from '../deck.ts';
+import {loadPokemonDecks,pokemonStorageKey} from '../pokemon/deck.ts';
+import {loadYugiohDecks,storageKey as yugiohStorageKey} from '../yugioh/deck.ts';
 import {isOnePieceDeck} from '../deck.ts';
 import {isPokemonDeck} from '../pokemon/deck.ts';
 import {isYugiohDeck} from '../yugioh/deck.ts';
+import {normalizeUsername} from './username.ts';
 
 type Status='local'|'loading'|'synced'|'pending'|'error';
 type Collections={[G in Game]:DeckByGame[G][]};
-type Account={accountId:string|null;accessId:string;status:Status;error:string;collections:Collections;createAccount:()=>Promise<void>;enterAccessId:(id:string)=>Promise<void>;saveDeck:<G extends Game>(game:G,deck:DeckByGame[G])=>boolean;retry:()=>Promise<void>;signOut:()=>Promise<void>};
+type Account={accountId:string|null;username:string;needsUsername:boolean;createdNotice:boolean;guestImportAvailable:boolean;status:Status;error:string;collections:Collections;continueWithUsername:(name:string)=>Promise<void>;redeemLegacyId:(id:string)=>Promise<void>;claimUsername:(name:string)=>Promise<void>;importGuestDecks:()=>Promise<void>;saveDeck:<G extends Game>(game:G,deck:DeckByGame[G])=>boolean;retry:()=>Promise<void>;signOut:()=>Promise<void>};
 const empty=():Collections=>({onepiece:[],pokemon:[],yugioh:[]});
 const games:Game[]=['onepiece','pokemon','yugioh'];
 const activeKey='tcg-builder.active-account.v1';
 const idKey=(accountId:string)=>`tcg-builder.access-id.${accountId}.v1`;
+const usernameKey=(accountId:string)=>`tcg-builder.username.${accountId}.v1`;
 const importedKey=(accountId:string)=>`tcg-builder.guest-imported.${accountId}.v1`;
 const guest={onepiece:loadDecks,pokemon:loadPokemonDecks,yugioh:loadYugiohDecks};
+const guestKeys=[onePieceStorageKey,pokemonStorageKey,yugiohStorageKey];
+const hasGuestDecks=(account:string)=>!localStorage.getItem(importedKey(account))&&guestKeys.some(key=>localStorage.getItem(key));
 const valid={onepiece:isOnePieceDeck,pokemon:(v:unknown)=>isPokemonDeck(v)&&!('leaderNumber' in (v as object))&&!('main' in (v as object)),yugioh:isYugiohDeck};
 const AccountContext=createContext<Account|null>(null);
 
 export function AccountProvider({children}:{children:ReactNode}){
- const [accountId,setAccountId]=useState<string|null>(null),[accessId,setAccessId]=useState(''),[status,setStatus]=useState<Status>('local'),[error,setError]=useState(''),[collections,setCollections]=useState<Collections>(empty);
+ const [accountId,setAccountId]=useState<string|null>(null),[username,setUsername]=useState(''),[createdNotice,setCreatedNotice]=useState(false),[guestImportAvailable,setGuestImportAvailable]=useState(false),[status,setStatus]=useState<Status>('local'),[error,setError]=useState(''),[collections,setCollections]=useState<Collections>(empty);
  const revisions=useRef(new Map<string,number>());
+ const activeRef=useRef<string|null>(null);
  const syncJobs=useRef<Promise<void>>(Promise.resolve());
  const rowKey=(game:Game,id:string)=>`${game}:${id}`;
  const fail=(message:string)=>{setError(message);setStatus('error');};
@@ -62,41 +67,64 @@ export function AccountProvider({children}:{children:ReactNode}){
   const cleared=clearPending(localStorage,account,game,deck.id,deck as never,expected);if(cleared.error)throw Error(cleared.error);
  },[readCloud]);
  const sync=useCallback(async(account:string)=>{
-  if(!accountClient)return;
+  if(!accountClient||activeRef.current!==account)return;
   setStatus('loading');setError('');
   try{
    const local=empty();
    for(const game of games){const cached=readAccountCache(localStorage,account,game);if(cached.error)throw Error(cached.error);(local as Record<Game,DeckByGame[Game][]>)[game]=cached.decks;}
-   setCollections(local);
+   if(activeRef.current!==account)return;setCollections(local);
+   const verified=await accountClient.rpc('account_username',{p_account_id:account});
+   if(verified.error){
+    if(/not authorized|invalid input syntax for type uuid/i.test(verified.error.message)){
+     localStorage.removeItem(activeKey);localStorage.removeItem(usernameKey(account));activeRef.current=null;revisions.current.clear();
+     setAccountId(null);setUsername('');setGuestImportAvailable(false);setCollections(empty());setStatus('local');setError('This browser is no longer linked to that username. Enter it again to open its decks.');return;
+    }
+    throw verified.error;
+   }
+   const verifiedName=verified.data===null?'':normalizeUsername(verified.data as string);
+   if(activeRef.current!==account)return;setUsername(verifiedName);if(verifiedName)localStorage.setItem(usernameKey(account),verifiedName);
    const rows=await readCloud(account);const next=empty();
+   if(activeRef.current!==account)return;
    for(const game of games){
     const cached=readAccountCache(localStorage,account,game);if(cached.error)throw Error(cached.error);
     const remote=rows.filter(r=>r.game===game).map(r=>r.payload) as never[];
-    let uploads=cached.pending.map(p=>p.deck) as DeckByGame[Game][];
+    const uploads=cached.pending.map(p=>p.deck) as DeckByGame[Game][];
     let merged=[...remote] as DeckByGame[Game][];
     for(const deck of uploads){const index=merged.findIndex(d=>d.id===deck.id);if(index>=0)merged[index]=deck;else merged.push(deck);}
-    if(!localStorage.getItem(importedKey(account))){
-     const source=guest[game](localStorage);if(source.error)throw Error(source.error);
-     const result=mergeDecks(source.decks as never[],merged as never[],()=>crypto.randomUUID());
-     merged=result.decks as DeckByGame[Game][];uploads=[...uploads,...result.uploads as DeckByGame[Game][]];
-    }
     const written=writeAccountCache(localStorage,account,game,merged as never);if(written.error)throw Error(written.error);
     for(const deck of uploads){const revision=revisions.current.get(rowKey(game,deck.id))??0;const queued=queueDeck(localStorage,account,game,deck as never,revision);if(queued.error)throw Error(queued.error);}
     (next as Record<Game,DeckByGame[Game][]>)[game]=merged;
    }
-   localStorage.setItem(importedKey(account),'1');setCollections(next);
-   for(const game of games){const cached=readAccountCache(localStorage,account,game);for(const item of cached.pending){await upload(account,game,item.deck,item.expectedRevision);}}
-   setStatus(games.some(game=>readAccountCache(localStorage,account,game).pending.length)?'pending':'synced');
-  }catch(e){const hasPending=games.some(game=>readAccountCache(localStorage,account,game).pending.length);setError((e as Error).message||'Cloud sync failed. Retry when connected.');setStatus(hasPending?'pending':'error');}
+   if(activeRef.current!==account)return;setCollections(next);
+   for(const game of games){const cached=readAccountCache(localStorage,account,game);for(const item of cached.pending){if(activeRef.current!==account)return;await upload(account,game,item.deck,item.expectedRevision);}}
+   if(activeRef.current===account)setStatus(games.some(game=>readAccountCache(localStorage,account,game).pending.length)?'pending':'synced');
+  }catch(e){if(activeRef.current!==account)return;const hasPending=games.some(game=>readAccountCache(localStorage,account,game).pending.length);setError((e as Error).message||'Cloud sync failed. Retry when connected.');setStatus(hasPending?'pending':'error');}
  },[readCloud,upload]);
  const retry=useCallback((accountOverride?:string)=>{const account=accountOverride??accountId;if(!account)return Promise.resolve();const job=syncJobs.current.then(()=>sync(account));syncJobs.current=job.catch(()=>{});return job;},[accountId,sync]);
- useEffect(()=>{if(!accountClient)return;let cancelled=false;(async()=>{try{const active=localStorage.getItem(activeKey);if(!active)return;const current=await accountClient.auth.getSession();if(!current.data.session||cancelled)return;setAccountId(active);setAccessId(localStorage.getItem(idKey(active))??'');await retry(active);}catch(e){if(!cancelled)fail((e as Error).message);}})();return()=>{cancelled=true;};},[]);
+ useEffect(()=>{if(!accountClient)return;let cancelled=false;(async()=>{try{const active=localStorage.getItem(activeKey);if(!active)return;const current=await accountClient.auth.getSession();if(!current.data.session||cancelled)return;activeRef.current=active;setAccountId(active);setUsername(localStorage.getItem(usernameKey(active))??'');setCreatedNotice(false);setGuestImportAvailable(hasGuestDecks(active));await retry(active);}catch(e){if(!cancelled)fail((e as Error).message);}})();return()=>{cancelled=true;};},[]);
  useEffect(()=>{if(!accountId)return;const reconnect=()=>{void retry(accountId);};window.addEventListener('online',reconnect);return()=>window.removeEventListener('online',reconnect);},[accountId,retry]);
- const link=async(id?:string)=>{if(!accountClient){fail('Cloud access is not configured.');return;}setStatus('loading');setError('');try{await session();let account:string,code='';if(id!==undefined){if(!/^[0-9a-f]{48}$/.test(id))throw Error('invalid');const found=await accountClient.rpc('redeem_access_id',{p_access_id:id});if(found.error||!found.data)throw Error('invalid');account=found.data as string;code=id;}else{const created=await accountClient.rpc('create_access_id');if(created.error||!created.data?.[0])throw created.error??Error('Access ID could not be created');account=created.data[0].account_id;code=created.data[0].access_id;}
-   localStorage.setItem(activeKey,account);localStorage.setItem(idKey(account),code);setAccountId(account);setAccessId(code);await retry(account);
-  }catch(e){if(id!==undefined){setError('Access ID could not be opened. Check the ID and try again.');setStatus(accountId?'synced':'local');}else fail((e as Error).message);}};
+ const activate=async(account:string,name:string,created=false)=>{if(activeRef.current&&activeRef.current!==account){revisions.current.clear();setCollections(empty());}activeRef.current=account;localStorage.setItem(activeKey,account);if(name)localStorage.setItem(usernameKey(account),name);setAccountId(account);setUsername(name);setCreatedNotice(created);setGuestImportAvailable(hasGuestDecks(account));await retry(account);};
+ const continueWithUsername=async(input:string)=>{if(!accountClient){fail('Cloud access is not configured.');return;}setStatus('loading');setError('');try{const name=normalizeUsername(input);await session();let result=await accountClient.rpc('open_username',{p_username:name});if(result.error?.message.includes('JWT issued at future')){await new Promise(resolve=>setTimeout(resolve,1100));result=await accountClient.rpc('open_username',{p_username:name});}const row=result.data?.[0];if(result.error||!row||typeof row.account_id!=='string'||row.username!==name||typeof row.created!=='boolean')throw result.error??Error('Invalid account response');await activate(row.account_id,name,row.created);}catch(e){fail((e as Error).message||'Username could not be opened.');}};
+ const redeemLegacyId=async(id:string)=>{if(!accountClient){fail('Cloud access is not configured.');return;}setStatus('loading');setError('');try{if(!/^[0-9a-f]{48}$/.test(id))throw Error('invalid');await session();const found=await accountClient.rpc('redeem_access_id',{p_access_id:id});if(found.error||typeof found.data!=='string')throw Error('invalid');const result=await accountClient.rpc('account_username',{p_account_id:found.data});if(result.error)throw result.error;await activate(found.data,result.data===null?'':normalizeUsername(result.data as string));}catch{setError('Old access ID could not be opened. Check it and try again.');setStatus(accountId?'synced':'local');}};
+ const claimUsername=async(input:string)=>{if(!accountClient||!accountId)return;setStatus('loading');setError('');try{const name=normalizeUsername(input);const result=await accountClient.rpc('claim_username',{p_account_id:accountId,p_username:name});if(result.error)throw result.error;if(result.data!==name)throw Error('Invalid account response');localStorage.setItem(usernameKey(accountId),name);localStorage.removeItem(idKey(accountId));setUsername(name);setCreatedNotice(false);await retry(accountId);}catch(e){fail((e as Error).message||'Username could not be claimed.');}};
+ const importGuestDecks=async()=>{
+  if(!accountId||!username||!guestImportAvailable)return;
+  if(!window.confirm(`Import this device's decks into username "${username}"? Anyone using that username can view and edit them.`))return;
+  setStatus('loading');setError('');
+  try{
+   await syncJobs.current;
+   const sources=games.map(game=>{const result=guest[game](localStorage);if(result.error)throw Error(result.error);return result.decks;});
+   for(const [index,game] of games.entries()){
+    const cached=readAccountCache(localStorage,accountId,game);if(cached.error)throw Error(cached.error);
+    const result=mergeDecks(sources[index] as never[],cached.decks as never[],()=>crypto.randomUUID());
+    for(const deck of result.uploads){const queued=queueDeck(localStorage,accountId,game,deck as never,0);if(queued.error)throw Error(queued.error);}
+   }
+   localStorage.setItem(importedKey(accountId),'1');setGuestImportAvailable(false);
+   await retry(accountId);
+  }catch(e){fail((e as Error).message||'Device decks could not be imported.');}
+ };
  const saveDeck=<G extends Game>(game:G,deck:DeckByGame[G]):boolean=>{if(!accountId)return false;const revision=revisions.current.get(rowKey(game,deck.id))??0;const queued=queueDeck(localStorage,accountId,game,deck,revision);if(queued.error){fail(queued.error);return false;}setCollections(c=>({...c,[game]:[...c[game].filter(d=>d.id!==deck.id),deck]}));setStatus('pending');void retry(accountId);return true;};
- const signOut=async()=>{if(!window.confirm('Sign out? Keep your access ID safe. Pending changes will remain on this device until you sign in and retry.'))return;await accountClient?.auth.signOut();if(accountId){localStorage.removeItem(activeKey);localStorage.removeItem(idKey(accountId));}setAccountId(null);setAccessId('');setCollections(empty());setError('');setStatus('local');revisions.current.clear();};
- return <AccountContext.Provider value={{accountId,accessId,status,error,collections,createAccount:()=>link(),enterAccessId:(id)=>link(id),saveDeck,retry:()=>retry(),signOut}}>{children}</AccountContext.Provider>;
+ const signOut=async()=>{if(!window.confirm('Sign out? Pending changes will remain on this device until you reopen this username and retry.'))return;await accountClient?.auth.signOut();activeRef.current=null;if(accountId){localStorage.removeItem(activeKey);localStorage.removeItem(idKey(accountId));localStorage.removeItem(usernameKey(accountId));}setAccountId(null);setUsername('');setCreatedNotice(false);setGuestImportAvailable(false);setCollections(empty());setError('');setStatus('local');revisions.current.clear();};
+ return <AccountContext.Provider value={{accountId,username,needsUsername:!!accountId&&!username,createdNotice,guestImportAvailable,status,error,collections,continueWithUsername,redeemLegacyId,claimUsername,importGuestDecks,saveDeck,retry:()=>retry(),signOut}}>{children}</AccountContext.Provider>;
 }
 export function useAccount(){const account=useContext(AccountContext);if(!account)throw Error('AccountProvider is missing');return account;}
