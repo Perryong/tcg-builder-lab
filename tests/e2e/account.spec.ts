@@ -93,7 +93,12 @@ test('a stored account marker without membership cannot display its cached decks
  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Sign out'}).click();
  await createUsername(page);
  await page.evaluate(({old,first})=>{localStorage.setItem('tcg-builder.active-account.v1',old!);localStorage.setItem(`tcg-builder.username.${old}.v1`,first);},{old,first});
+ let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});let seen!:()=>void;const intercepted=new Promise<void>(resolve=>{seen=resolve;});
+ await page.route('**/rest/v1/rpc/account_username',async route=>{seen();await gate;await route.continue();});
  await page.reload({waitUntil:'domcontentloaded'});
+ await intercepted;
+ await expect(page.getByLabel('Username',{exact:true})).toBeVisible();
+ release();
  await expect(page.getByLabel('Username',{exact:true})).toBeVisible();
  await expect(page.getByText('Cached old crew')).toHaveCount(0);
 });
@@ -127,6 +132,24 @@ test('guest import requires confirmation and remains available after decline',as
  await expect(second.getByLabel('Load saved deck')).toContainText('Private guest crew');
  await second.getByLabel('Choose card game').selectOption('pokemon');await second.getByRole('button',{name:'Deck builder',exact:true}).click();
  await expect(second.getByLabel('Saved Pokémon decks')).toContainText('Private guest Pokémon');
+ await other.close();
+});
+
+test('new guest decks can be imported after an earlier confirmed import',async({page,browser})=>{
+ test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase');
+ const name=uniqueName();await page.goto('./',{waitUntil:'domcontentloaded'});
+ await page.getByRole('button',{name:'Deck builder',exact:true}).click();await page.getByRole('textbox',{name:'Deck name'}).fill('First guest');await page.getByRole('button',{name:'Save deck',exact:true}).click();
+ await openUsername(page,name);page.once('dialog',d=>d.accept());await page.getByRole('button',{name:"Import this device's decks"}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Sign out'}).click();
+ await page.getByRole('button',{name:'Deck builder',exact:true}).click();await page.getByRole('button',{name:'New deck',exact:true}).click();
+ await page.getByRole('textbox',{name:'Deck name'}).fill('Later guest');await page.getByRole('button',{name:'Save deck',exact:true}).click();
+ await openUsername(page,name);
+ await expect(page.getByRole('button',{name:"Import this device's decks"})).toBeVisible();
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:"Import this device's decks"}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
+ const other=await browser.newContext();const second=await other.newPage();await second.goto('./',{waitUntil:'domcontentloaded'});await openUsername(second,name);
+ await second.getByRole('button',{name:'Deck builder',exact:true}).click();await expect(second.getByLabel('Load saved deck')).toContainText('First guest');await expect(second.getByLabel('Load saved deck')).toContainText('Later guest');
  await other.close();
 });
 
@@ -257,6 +280,29 @@ test('concurrent Yu-Gi-Oh! edits keep a conflict copy',async({page,browser})=>{
  await expect(second.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
  await expect(second.getByLabel('Saved decks')).toContainText('First edit');
  await expect(second.getByLabel('Saved decks')).toContainText('Third edit (from this device)');await other.close();
+});
+
+test('a delayed old-account response cannot set the next account revision',async({page})=>{
+ test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase');
+ const first=uniqueName(),second=uniqueName();await page.goto('./',{waitUntil:'domcontentloaded'});
+ await page.getByRole('button',{name:'Deck builder',exact:true}).click();await page.getByRole('textbox',{name:'Deck name'}).fill('Same card ID');await page.getByRole('button',{name:'Save deck',exact:true}).click();
+ await openUsername(page,first);page.once('dialog',d=>d.accept());await page.getByRole('button',{name:"Import this device's decks"}).click();await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
+ await page.getByRole('textbox',{name:'Deck name'}).fill('First account version two');await page.getByRole('button',{name:'Save deck',exact:true}).click();await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
+ const firstId=await page.evaluate(()=>localStorage.getItem('tcg-builder.active-account.v1'));
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Sign out'}).click();
+ await openUsername(page,second);page.once('dialog',d=>d.accept());await page.getByRole('button',{name:"Import this device's decks"}).click();await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Sign out'}).click();
+ await openUsername(page,first);await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
+ let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});let seen!:()=>void;const intercepted=new Promise<void>(resolve=>{seen=resolve;});let held=false;
+ await page.route('**/rest/v1/saved_decks*',async route=>{if(!held&&route.request().url().includes(firstId!)){held=true;seen();await gate;}await route.continue();});
+ await page.evaluate(()=>window.dispatchEvent(new Event('online')));await intercepted;
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Sign out'}).click();
+ await openUsername(page,second);release();await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
+ await page.getByRole('button',{name:'Deck builder',exact:true}).click();await page.getByLabel('Load saved deck').selectOption({label:'Same card ID'});
+ await page.getByRole('textbox',{name:'Deck name'}).fill('Second account edit');await page.getByRole('button',{name:'Save deck',exact:true}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
+ await expect(page.getByLabel('Load saved deck')).toContainText('Second account edit');
+ await expect(page.getByLabel('Load saved deck')).not.toContainText('(from this device)');
 });
 
 test('invalid cloud deck stays in the database and is not shown',async({page})=>{
