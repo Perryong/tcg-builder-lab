@@ -59,6 +59,9 @@ export function AccountProvider({children}:{children:ReactNode}){
   const account=accountOverride??accountId;if(!account||!accountClient)return;
   setStatus('loading');setError('');
   try{
+   const local=empty();
+   for(const game of games){const cached=readAccountCache(localStorage,account,game);if(cached.error)throw Error(cached.error);(local as Record<Game,DeckByGame[Game][]>)[game]=cached.decks;}
+   setCollections(local);
    const rows=await readCloud(account);const next=empty();
    for(const game of games){
     const cached=readAccountCache(localStorage,account,game);if(cached.error)throw Error(cached.error);
@@ -77,7 +80,7 @@ export function AccountProvider({children}:{children:ReactNode}){
    }
    localStorage.setItem(importedKey(account),'1');setCollections(next);
    for(const game of games){const cached=readAccountCache(localStorage,account,game);for(const item of cached.pending){await upload(account,game,item.deck,item.expectedRevision);}}
-   setStatus('synced');
+   setStatus(games.some(game=>readAccountCache(localStorage,account,game).pending.length)?'pending':'synced');
   }catch(e){const hasPending=games.some(game=>readAccountCache(localStorage,account,game).pending.length);setError((e as Error).message||'Cloud sync failed. Retry when connected.');setStatus(hasPending?'pending':'error');}
  },[accountId,readCloud,upload]);
  useEffect(()=>{if(!accountClient)return;let cancelled=false;(async()=>{try{const active=localStorage.getItem(activeKey);if(!active)return;const current=await accountClient.auth.getSession();if(!current.data.session||cancelled)return;setAccountId(active);setAccessId(localStorage.getItem(idKey(active))??'');await retry(active);}catch(e){if(!cancelled)fail((e as Error).message);}})();return()=>{cancelled=true;};},[retry]);

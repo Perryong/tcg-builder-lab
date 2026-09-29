@@ -38,7 +38,7 @@ Artwork is loaded remotely, not copied into this repository. Providers may remov
 
 ## Decks and restrictions
 
-Decks use explicit **Save deck** and are stored in this browser's localStorage. Export to text to move them or back them up. Failed saves display an error. Corrupt existing storage is preserved rather than silently overwritten; export drafts before closing. Starting or loading another deck warns about unsaved changes.
+Decks use explicit **Save deck**. Without an access ID they stay in this browser's localStorage. With an ID they are cached locally and synced to Supabase; the header distinguishes synced, pending and failed work. Export to text for a separate backup. Corrupt existing storage is preserved rather than silently overwritten. Starting or loading another deck warns about unsaved changes.
 
 Checks cover main-deck size, Leader selection, DON!! count, card colors, card-number copy limits across illustrations, known card/leader construction exceptions, current bans, and banned pairs. Purple Enel's six-DON rule is supported. The rules snapshot records current restrictions observed on September 27, 2026, and Mihawk's announced October 12 ban separately. Earlier historical ban legality is not reconstructed. Rules are not refreshed by the meta command; recheck and update `public/data/rules.json` against official sources when announcements change.
 
@@ -52,14 +52,14 @@ The initial meta snapshot contains 242 records from [One Piece Top Decks' OP-17 
 
 Eight leader guides provide qualitative strengths, weaknesses, and construction suggestions based on printed leader effects. They are explicitly labeled as analysis, not measured matchup evidence. Custom decks receive structural observations, not fictional win rates. No matchup simulation or strength score is implemented. Current guidance does not claim to provide exhaustive matchup analysis.
 
-Snapshots older than 14 days are labeled stale. Updates are manual commands; no unattended job, account, database, or public hosting was added.
+Snapshots older than 14 days are labeled stale. Card and meta updates remain manual commands.
 # tcg-builder-lab
 
 ## GitHub Pages and CI/CD
 
 Live site: https://perryong.github.io/tcg-builder-lab/
 
-`.github/workflows/pages.yml` runs on pull requests, pushes to `main`, and manual dispatch. It installs dependencies with `npm ci`, runs unit checks, builds for `/tcg-builder-lab/`, and runs Playwright against the production build. Successful `main` builds deploy the same artifact to GitHub Pages. Pull requests only run checks. Pages uses GitHub Actions as its publishing source; no personal access token is stored in the workflow.
+`.github/workflows/pages.yml` runs on pull requests, pushes to `main`, and manual dispatch. It runs unit and browser checks, plus pgTAP and account browser checks against an isolated local Supabase stack. Successful `main` builds deploy the same artifact to GitHub Pages after both jobs pass. Pull requests only run checks. Pages uses GitHub Actions as its publishing source; no personal access token is stored in the workflow.
 
 To reproduce the production checks locally:
 
@@ -68,7 +68,15 @@ npm run build -- --base=/tcg-builder-lab/
 PLAYWRIGHT_PREVIEW=1 npm run test:e2e
 ```
 
-Data snapshots remain manual updates; commit refreshed snapshots to `main` to publish them. Browser-saved decks are specific to the site's origin; use text export/import to move decks from localhost to the hosted site.
+Data snapshots remain manual updates; commit refreshed snapshots to `main` to publish them. Guest decks are specific to the site's origin; use text export/import to move guest decks from localhost to the hosted site.
+
+## Access ID and cloud decks
+
+Choose **Create access ID** to get a generated 48-character ID, or enter an existing ID to open the same One Piece, Pokémon and Yu-Gi-Oh! decks on another device. Anyone who knows the ID can read and edit those decks. Save it somewhere private: there is no email, password or recovery process. Signing out removes the ID from this browser; pending work remains in its account-scoped local cache until the same ID is entered again. The app never puts the ID in a URL.
+
+Cloud saves require an anonymous Supabase Auth session and the SQL migration in `supabase/migrations`. The browser build uses only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Do not use a secret or service-role key in Vite or GitHub Pages. Set those two GitHub repository variables for deployment, and set them in an ignored `.env.local` for local development. Enable anonymous sign-ins in the Supabase project's Auth settings before deployment. The catalog, artwork links and tournament evidence remain static files in this repository; only personal decks sync.
+
+For isolated local account checks, run `supabase start` and `supabase test db`, then supply the local API URL and publishable key in `.env.local`; set `ACCOUNT_TEST_SUPABASE_URL` and `ACCOUNT_TEST_DB_CONTAINER` when running `tests/e2e/account.spec.ts`. Ordinary browser checks skip account cases without the local stack and never use the production database.
 
 ## Pokémon support
 
@@ -76,7 +84,7 @@ Choose **Pokémon** in the game selector to explore 21,290 English physical card
 
 The Pokémon builder checks 60 cards, Basic Pokémon, copy limits across official card names, Basic Energy exceptions, sourced ACE SPEC/Radiant limits, regulation marks and dated rotation. English international Standard is the default. Equivalent reprint/errata mappings, individual promo releases, complete restrictions and event-specific rules are not fully verified; structural checks do not certify tournament legality. Older same-name printings are not automatically granted eligibility. Ambiguous upstream Energy metadata remains unknown rather than receiving the Basic Energy exception.
 
-Pokémon saves use a separate browser storage key; One Piece saves are preserved. Both unsaved drafts survive switching games within the session. Save explicitly or export before closing/reloading. Text imports accept exact quantity-plus-card-ID lines and verified set-code/collector-number lines with matching names. Unknown or ambiguous printings are rejected, without replacing the draft.
+Pokémon guest saves use a separate browser storage key; One Piece saves are preserved. Account decks also stay separate by game. Both unsaved drafts survive switching games within the session. Save explicitly or export before closing/reloading. Text imports accept exact quantity-plus-card-ID lines and verified set-code/collector-number lines with matching names. Unknown or ambiguous printings are rejected, without replacing the draft.
 
 The initial Pokémon meta sample contains 64 top-16 Masters records from four completed August/September 2026 events, with international Standard and Japan Standard separated. Sixty lists resolve to known 60-card decks; four retain source links without a load action. Nine guides explain printed-card strategy and trade-offs, labeled qualitative analysis. Sample shares are not global rankings or win rates. Unsupported custom decks receive limited structural observations.
 
@@ -95,7 +103,7 @@ Pokémon artwork repair: `npm run repair:pokemon-artwork` fills missing links fr
 
 ### Yu-Gi-Oh! English / Japanese
 
-Select Yu-Gi-Oh! to browse localized cards and sets, build separate Main/Extra/Side sections, save decks locally, and import/export exact card IDs or `.ydk` passwords. Card language does not change TCG/OCG deck format. Tournament evidence is separated by format and date window.
+Select Yu-Gi-Oh! to browse localized cards and sets, build separate Main/Extra/Side sections, save decks locally or with an access ID, and import/export exact card IDs or `.ydk` passwords. Card language does not change TCG/OCG deck format. Tournament evidence is separated by format and date window.
 
 Catalog metadata: [YAML Yugi](https://github.com/DawnbrandBots/yaml-yugi). Genuine language-specific art: [YGOResources artwork index](https://github.com/yugioh-artworks/artworks-index). Browser image serving follows that provider’s documented web-app usage. Images are not generated and are not guaranteed for every printing. Set counts represent imported unique identities and printing records, not certified advertised product totals.
 

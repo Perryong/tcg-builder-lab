@@ -128,3 +128,45 @@ test('invalid cloud deck stays in the database and is not shown',async({page})=>
  const check=execFileSync('docker',['exec',process.env.ACCOUNT_TEST_DB_CONTAINER!,'psql','-U','postgres','-d','postgres','-tAc',`select revision from public.saved_decks where account_id='${account}' and deck_id='malformed'`],{encoding:'utf8'});
  expect(check.trim()).toBe('1');
 });
+
+test('offline save survives reload and retries to another browser',async({page,browser})=>{
+ test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase Auth and database');
+ await page.goto('./',{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'Create access ID'}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});const id=await page.getByLabel('Your access ID').inputValue();
+ await page.getByRole('button',{name:'Deck builder',exact:true}).click();
+ await page.route('**/rest/v1/**',route=>route.abort());
+ await page.getByRole('textbox',{name:'Deck name'}).fill('Offline crew');await page.getByRole('button',{name:'Save deck',exact:true}).click();
+ await expect(page.locator('.account-status')).toHaveText('Pending sync',{timeout:20000});
+ await page.reload({waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'Deck builder',exact:true}).click();
+ await expect(page.getByLabel('Load saved deck')).toContainText('Offline crew');
+ await expect(page.locator('.account-status')).toHaveText('Pending sync',{timeout:20000});
+ await page.unroute('**/rest/v1/**');await page.getByRole('button',{name:'Retry sync'}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ const other=await browser.newContext();const second=await other.newPage();await second.goto('./',{waitUntil:'domcontentloaded'});
+ await second.getByLabel('Enter access ID').fill(id);await second.getByRole('button',{name:'Open saved decks'}).click();
+ await expect(second.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ await second.getByRole('button',{name:'Deck builder',exact:true}).click();await expect(second.getByLabel('Load saved deck')).toContainText('Offline crew');await other.close();
+});
+
+test('signing out retains pending account work for the same ID',async({page})=>{
+ test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase Auth and database');
+ await page.goto('./',{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'Create access ID'}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});const id=await page.getByLabel('Your access ID').inputValue();
+ await page.getByRole('button',{name:'Deck builder',exact:true}).click();
+ await page.route('**/rest/v1/rpc/save_deck',route=>route.abort());
+ await page.getByRole('textbox',{name:'Deck name'}).fill('Pending after signout');await page.getByRole('button',{name:'Save deck',exact:true}).click();
+ await expect(page.locator('.account-status')).toHaveText('Pending sync',{timeout:20000});
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Sign out'}).click();
+ await expect(page.getByRole('button',{name:'Create access ID'})).toBeVisible();
+ await page.unroute('**/rest/v1/rpc/save_deck');await page.getByLabel('Enter access ID').fill(id);await page.getByRole('button',{name:'Open saved decks'}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ await expect(page.getByLabel('Load saved deck')).toContainText('Pending after signout');
+});
+
+test('account controls fit a narrow mobile viewport',async({page})=>{
+ test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase Auth and database');
+ await page.setViewportSize({width:390,height:844});await page.goto('./',{waitUntil:'domcontentloaded'});
+ await page.getByRole('button',{name:'Create access ID'}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
