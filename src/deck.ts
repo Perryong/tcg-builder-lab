@@ -59,15 +59,15 @@ export function parseDeck(text: string, cards: Card[]): Deck {
 export function exportDeck(deck: Deck): string {
   return [`# ${deck.name.replace(/[\r\n]/g,' ')}`, ...(deck.leaderNumber ? [`1 ${deck.leaderNumber}`] : []), ...Object.entries(deck.cards).sort(([a],[b])=>a.localeCompare(b)).map(([n,q])=>`${q} ${n}`), `${deck.donCount} DON!!`].join('\n');
 }
-function isDeck(d: unknown): d is Deck {
+export function isOnePieceDeck(d: unknown): d is Deck {
   const v=d as Deck;
   return !!v && typeof v.id==='string' && typeof v.name==='string' && (v.leaderNumber===null || typeof v.leaderNumber==='string') && Number.isSafeInteger(v.donCount) && v.donCount>=0 && !!v.cards && typeof v.cards==='object' && !Array.isArray(v.cards) && Object.entries(v.cards).every(([n,q])=>/^(?:(?:OP|ST|EB|PRB)\d{2}|P)-\d{3}$/.test(n) && Number.isSafeInteger(q) && q>0 && q<=100);
 }
 export function loadDecks(storage: Storage): { decks: Deck[]; error: string | null } {
-  try { const data=JSON.parse(storage.getItem(storageKey) ?? '[]');if(!Array.isArray(data) || !data.every(isDeck)) throw new Error('Invalid saved decks');return { decks:data, error:null }; }
+  try { const data=JSON.parse(storage.getItem(storageKey) ?? '[]');if(!Array.isArray(data) || !data.every(isOnePieceDeck)) throw new Error('Invalid saved decks');return { decks:data, error:null }; }
   catch { return { decks:[],error:'Saved decks could not be read. Original storage has been preserved. Export your current deck before closing.' }; }
 }
 export function saveDecks(storage: Storage, decks: Deck[]): { error: string | null } {
-  try { if (!decks.every(isDeck)) throw new Error('Invalid deck'); storage.setItem(storageKey,JSON.stringify(decks));return {error:null}; }
+  try { if (!decks.every(isOnePieceDeck)) throw new Error('Invalid deck'); storage.setItem(storageKey,JSON.stringify(decks));return {error:null}; }
   catch { return {error:'Deck could not be saved in this browser. Export it to avoid losing your changes.'}; }
 }
