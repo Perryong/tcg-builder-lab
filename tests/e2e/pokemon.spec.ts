@@ -30,7 +30,7 @@ test('Pokémon mobile navigation and data failures preserve One Piece',async({pa
 });
 test('corrupt Pokémon saves are preserved and exact text exports retain the draft',async({page})=>{
  await page.addInitScript(()=>localStorage.setItem('tcg-builder.pokemon.decks.v1','broken'));
- await page.goto('./');await page.getByLabel('Choose card game').selectOption('pokemon');await page.getByRole('button',{name:'Deck builder',exact:true}).click();await expect(page.getByRole('alert')).toContainText('Original storage is preserved');await page.getByRole('button',{name:'Save deck',exact:true}).click();expect(await page.evaluate(()=>localStorage.getItem('tcg-builder.pokemon.decks.v1'))).toBe('broken');
+ await page.goto('./');await page.getByLabel('Choose card game').selectOption('pokemon');await page.getByRole('button',{name:'Deck builder',exact:true}).click();await expect(page.getByRole('textbox',{name:'Pokémon deck name'})).toBeVisible({timeout:20000});await expect(page.getByRole('alert')).toContainText('Original storage is preserved');await page.getByRole('button',{name:'Save deck',exact:true}).click();expect(await page.evaluate(()=>localStorage.getItem('tcg-builder.pokemon.decks.v1'))).toBe('broken');
  await page.getByRole('textbox',{name:'Search Pokémon deck cards'}).fill('sv06-130');await page.getByRole('button',{name:'Add Dragapult ex sv06-130 to deck',exact:true}).click();await page.getByRole('button',{name:'Export deck',exact:true}).click();await expect(page.getByRole('textbox',{name:'Pokémon deck list text'})).toHaveValue(/1 sv06-130/);
 });
 

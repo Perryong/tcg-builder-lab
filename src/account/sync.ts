@@ -11,6 +11,7 @@ export type Pending<G extends Game>={deck:DeckByGame[G];expectedRevision:number}
 const invalid='Invalid deck or account cache; original data preserved.';
 const validators={onepiece:isOnePieceDeck,pokemon:(v:unknown):v is PokemonDeck=>isPokemonDeck(v)&&!('leaderNumber' in v)&&!('main' in v),yugioh:isYugiohDeck};
 const canonical=(v:unknown):string=>JSON.stringify(v,(_,value)=>value&&typeof value==='object'&&!Array.isArray(value)?Object.fromEntries(Object.entries(value).sort(([a],[b])=>a.localeCompare(b))):value);
+export const sameDeck=(a:unknown,b:unknown)=>canonical(a)===canonical(b);
 
 export function mergeDecks<T extends {id:string;name:string}>(local:T[],remote:T[],newId:()=>string):{decks:T[];uploads:T[];conflicts:number}{
  const decks=[...remote],uploads:T[]=[],ids=new Set(remote.map(d=>d.id));let conflicts=0;

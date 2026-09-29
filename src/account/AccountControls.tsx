@@ -1,10 +1,11 @@
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
 import {accountClient} from './client.ts';
 import {useAccount} from './AccountProvider.tsx';
 
 export default function AccountControls(){
  const {accountId,accessId,status,error,createAccount,enterAccessId,retry,signOut}=useAccount();
  const [entry,setEntry]=useState(''),[copied,setCopied]=useState(false);
+ useEffect(()=>{if(accountId)setEntry('');},[accountId]);
  return <div className="account-controls" aria-label="Deck cloud account">
   {!accountClient?<span>Decks saved on this device</span>:accountId?<>
    <span className="account-status" role="status">{status==='synced'?'Cloud synced':status==='pending'?'Pending sync':status==='loading'?'Syncing…':'Sync error'}</span>

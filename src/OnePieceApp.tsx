@@ -40,7 +40,7 @@ export default function OnePieceApp() {
     setNotice(`Loaded sourced list from ${event.date}. Check your event's format before playing.`);navigate('deck');
   };
   const save=()=>{
-    if(account.accountId){void account.saveDeck('onepiece',deck);setStorageError('');setNotice('Deck saved on this device. Cloud sync status is shown above.');return;}
+    if(account.accountId){if(account.saveDeck('onepiece',deck)){setStorageError('');setNotice('Deck saved on this device. Cloud sync status is shown above.');}else setStorageError('Account deck could not be saved on this device. Export your draft.');return;}
     if(initial.error){setStorageError(initial.error+' Saving is disabled to protect the original storage.');return;}
     const next=saved.some(d=>d.id===deck.id)?saved.map(d=>d.id===deck.id?deck:d):[...saved,deck];
     try{const result=saveDecks(localStorage,next);if(result.error){setStorageError(result.error);return;}setGuestSaved(next);setStorageError('');setNotice('Deck saved in this browser.');}catch{setStorageError('Storage unavailable. Export your deck to keep it.');}
