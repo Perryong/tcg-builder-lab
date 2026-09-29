@@ -38,7 +38,7 @@ Artwork is loaded remotely, not copied into this repository. Providers may remov
 
 ## Decks and restrictions
 
-Decks use explicit **Save deck**. Without an access ID they stay in this browser's localStorage. With an ID they are cached locally and synced to Supabase; the header distinguishes synced, pending and failed work. Export to text for a separate backup. Corrupt existing storage is preserved rather than silently overwritten. Starting or loading another deck warns about unsaved changes.
+Decks use explicit **Save deck**. Without a username they stay in this browser's localStorage. With a username they are cached locally and synced to Supabase; the header distinguishes synced, pending and failed work. Export to text for a separate backup. Corrupt existing storage is preserved rather than silently overwritten. Starting or loading another deck warns about unsaved changes.
 
 Checks cover main-deck size, Leader selection, DON!! count, card colors, card-number copy limits across illustrations, known card/leader construction exceptions, current bans, and banned pairs. Purple Enel's six-DON rule is supported. The rules snapshot records current restrictions observed on September 27, 2026, and Mihawk's announced October 12 ban separately. Earlier historical ban legality is not reconstructed. Rules are not refreshed by the meta command; recheck and update `public/data/rules.json` against official sources when announcements change.
 
@@ -70,9 +70,11 @@ PLAYWRIGHT_PREVIEW=1 npm run test:e2e
 
 Data snapshots remain manual updates; commit refreshed snapshots to `main` to publish them. Guest decks are specific to the site's origin; use text export/import to move guest decks from localhost to the hosted site.
 
-## Access ID and cloud decks
+## Username and cloud decks
 
-Choose **Create access ID** to get a generated 48-character ID, or enter an existing ID to open the same One Piece, Pokémon and Yu-Gi-Oh! decks on another device. Anyone who knows the ID can read and edit those decks. Save it somewhere private: there is no email, password or recovery process. Signing out removes the ID from this browser; pending work remains in its account-scoped local cache until the same ID is entered again. The app never puts the ID in a URL.
+Enter a username and choose **Continue with username**. An unused username creates an empty cloud account; an existing one opens its One Piece, Pokémon and Yu-Gi-Oh! decks. Names are case-insensitive and allow 3–24 ASCII letters, numbers or underscores. A “New username created” notice helps flag accidental typos. **Anyone who knows or guesses a username can view and edit its decks.** There is no email, password, ownership check, recovery or revocation. A username is a shared edit handle, not a private account credential.
+
+When you open a username, guest decks saved on that device stay local. Choose **Import this device's decks** and confirm the exact username before uploading them; declining leaves the guest decks and import action intact. Signing out removes the active username from this browser, while pending account saves remain in its account-scoped local cache until that username is reopened. An existing 48-character access ID can still be entered under **Have an old access ID?**; claim a username after opening it. Claiming keeps the same decks and account, and the old ID remains usable during this compatibility period. New access IDs are no longer created by the UI.
 
 Cloud saves require an anonymous Supabase Auth session and the SQL migration in `supabase/migrations`. The browser build uses only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Do not use a secret or service-role key in Vite or GitHub Pages. Set those two GitHub repository variables for deployment, and set them in an ignored `.env.local` for local development. Enable anonymous sign-ins in the Supabase project's Auth settings before deployment. The catalog, artwork links and tournament evidence remain static files in this repository; only personal decks sync.
 
@@ -103,7 +105,7 @@ Pokémon artwork repair: `npm run repair:pokemon-artwork` fills missing links fr
 
 ### Yu-Gi-Oh! English / Japanese
 
-Select Yu-Gi-Oh! to browse localized cards and sets, build separate Main/Extra/Side sections, save decks locally or with an access ID, and import/export exact card IDs or `.ydk` passwords. Card language does not change TCG/OCG deck format. Tournament evidence is separated by format and date window.
+Select Yu-Gi-Oh! to browse localized cards and sets, build separate Main/Extra/Side sections, save decks locally or with a username, and import/export exact card IDs or `.ydk` passwords. Card language does not change TCG/OCG deck format. Tournament evidence is separated by format and date window.
 
 Catalog metadata: [YAML Yugi](https://github.com/DawnbrandBots/yaml-yugi). Genuine language-specific art: [YGOResources artwork index](https://github.com/yugioh-artworks/artworks-index). Browser image serving follows that provider’s documented web-app usage. Images are not generated and are not guaranteed for every printing. Set counts represent imported unique identities and printing records, not certified advertised product totals.
 
