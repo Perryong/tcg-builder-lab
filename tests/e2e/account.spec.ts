@@ -178,6 +178,22 @@ test('old access ID claims a username without moving its decks',async({page,brow
  await expect(second.getByLabel('Load saved deck')).toContainText('Old crew');await other.close();
 });
 
+test('an upgraded legacy browser keeps its account marker through an offline reload',async({page})=>{
+ test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase');
+ const old=await legacyAccount();await page.goto('./',{waitUntil:'domcontentloaded'});
+ await page.getByText('Have an old access ID?').click();await page.getByLabel('Enter old access ID').fill(old.access_id);await page.getByRole('button',{name:'Move old decks'}).click();
+ await expect(page.getByLabel('Choose username')).toBeVisible();
+ await page.getByRole('button',{name:'Deck builder',exact:true}).click();await page.getByRole('textbox',{name:'Deck name'}).fill('Legacy offline crew');await page.getByRole('button',{name:'Save deck',exact:true}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
+ await page.evaluate(id=>localStorage.removeItem(`tcg-builder.auth-user.${id}.v1`),old.account_id);
+ await page.route('**/rest/v1/rpc/account_username',route=>route.abort());await page.reload({waitUntil:'domcontentloaded'});
+ await expect(page.getByRole('alert')).toContainText('Connect to verify');
+ expect(await page.evaluate(()=>localStorage.getItem('tcg-builder.active-account.v1'))).toBe(old.account_id);
+ await page.unroute('**/rest/v1/rpc/account_username');await page.evaluate(()=>window.dispatchEvent(new Event('online')));
+ await expect(page.getByLabel('Choose username')).toBeVisible();
+ await page.getByRole('button',{name:'Deck builder',exact:true}).click();await expect(page.getByLabel('Load saved deck')).toContainText('Legacy offline crew');
+});
+
 test('One Piece guest deck imports to a username without replacing a draft',async({page,browser})=>{
  test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase Auth and database');
  await page.goto('./',{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'Deck builder',exact:true}).click();

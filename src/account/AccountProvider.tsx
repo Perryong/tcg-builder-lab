@@ -103,18 +103,25 @@ export function AccountProvider({children}:{children:ReactNode}){
   }catch(e){if(activeRef.current!==account)return;const hasPending=games.some(game=>readAccountCache(localStorage,account,game).pending.length);setError((e as Error).message||'Cloud sync failed. Retry when connected.');setStatus(hasPending?'pending':'error');}
  },[readCloud,upload]);
  const retry=useCallback((accountOverride?:string)=>{const account=accountOverride??accountId;if(!account)return Promise.resolve();const job=syncJobs.current.then(()=>sync(account));syncJobs.current=job.catch(()=>{});return job;},[accountId,sync]);
- useEffect(()=>{if(!accountClient)return;let cancelled=false;(async()=>{try{
+ useEffect(()=>{const client=accountClient;if(!client)return;let cancelled=false;const resume=async()=>{try{
+  if(activeRef.current)return;
   const active=localStorage.getItem(activeKey);if(!active)return;
-  const current=await accountClient.auth.getSession();if(!current.data.session||cancelled)return;
-  const found=await accountClient.rpc('account_username',{p_account_id:active});if(cancelled)return;
-  if(found.error&&(!/failed to fetch|networkerror/i.test(found.error.message)||localStorage.getItem(userKey(active))!==current.data.session.user.id)){
-   localStorage.removeItem(activeKey);localStorage.removeItem(usernameKey(active));localStorage.removeItem(userKey(active));setError('This browser is no longer linked to that username. Enter it again to open its decks.');return;
+  const current=await client.auth.getSession();if(!current.data.session||cancelled)return;
+  const found=await client.rpc('account_username',{p_account_id:active});if(cancelled||activeRef.current)return;
+  if(found.error){
+   if(/not authorized|invalid input syntax for type uuid/i.test(found.error.message)){
+    localStorage.removeItem(activeKey);localStorage.removeItem(usernameKey(active));localStorage.removeItem(userKey(active));
+    setError('This browser is no longer linked to that username. Enter it again to open its decks.');return;
+   }
+   if(!/failed to fetch|networkerror/i.test(found.error.message)||localStorage.getItem(userKey(active))!==current.data.session.user.id){
+    setError('Connect to verify this browser before opening its saved account.');return;
+   }
   }
   const name=found.error?localStorage.getItem(usernameKey(active))??'':found.data===null?'':normalizeUsername(found.data as string);
   activeRef.current=active;setAccountId(active);setUsername(name);setCreatedNotice(false);setGuestImportAvailable(hasGuestDecks(active));
   if(!found.error){localStorage.setItem(userKey(active),current.data.session.user.id);if(name)localStorage.setItem(usernameKey(active),name);}
   await retry(active);
- }catch(e){if(!cancelled)fail((e as Error).message);}})();return()=>{cancelled=true;};},[]);
+ }catch(e){if(!cancelled)fail((e as Error).message);}};void resume();window.addEventListener('online',resume);return()=>{cancelled=true;window.removeEventListener('online',resume);};},[]);
  useEffect(()=>{if(!accountId)return;const reconnect=()=>{void retry(accountId);};window.addEventListener('online',reconnect);return()=>window.removeEventListener('online',reconnect);},[accountId,retry]);
  const activate=async(account:string,name:string,created=false)=>{if(activeRef.current&&activeRef.current!==account){revisions.current.clear();setCollections(empty());}const current=await accountClient!.auth.getSession();if(!current.data.session)throw Error('Sign in again to open this username.');activeRef.current=account;localStorage.setItem(activeKey,account);localStorage.setItem(userKey(account),current.data.session.user.id);if(name)localStorage.setItem(usernameKey(account),name);setAccountId(account);setUsername(name);setCreatedNotice(created);setGuestImportAvailable(hasGuestDecks(account));await retry(account);};
  const continueWithUsername=async(input:string)=>{if(!accountClient){fail('Cloud access is not configured.');return;}setStatus('loading');setError('');try{const name=normalizeUsername(input);await session();let result=await accountClient.rpc('open_username',{p_username:name});if(result.error?.message.includes('JWT issued at future')){await new Promise(resolve=>setTimeout(resolve,1100));result=await accountClient.rpc('open_username',{p_username:name});}const row=result.data?.[0];if(result.error||!row||typeof row.account_id!=='string'||row.username!==name||typeof row.created!=='boolean')throw result.error??Error('Invalid account response');await activate(row.account_id,name,row.created);}catch(e){fail((e as Error).message||'Username could not be opened.');}};
