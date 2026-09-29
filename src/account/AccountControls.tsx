@@ -17,9 +17,8 @@ export default function AccountControls(){
    <button onClick={signOut}>Sign out</button>
   </>:<>
    <form onSubmit={e=>{e.preventDefault();void continueWithUsername(entry);}}><label>Username <input aria-label="Username" value={entry} onChange={e=>setEntry(e.target.value)} autoComplete="username" spellCheck={false}/></label><button disabled={status==='loading'}>Continue with username</button></form>
-   <details><summary>Have an old access ID?</summary><form onSubmit={e=>{e.preventDefault();void redeemLegacyId(oldId.trim().toLowerCase());}}><label>Enter old access ID <input aria-label="Enter old access ID" value={oldId} onChange={e=>setOldId(e.target.value)} autoComplete="off" spellCheck={false}/></label><button disabled={status==='loading'}>Move old decks</button></form></details>
+   <details><summary>Move old decks</summary><form onSubmit={e=>{e.preventDefault();void redeemLegacyId(oldId.trim().toLowerCase());}}><label>Enter old access ID <input aria-label="Enter old access ID" value={oldId} onChange={e=>setOldId(e.target.value)} autoComplete="off" spellCheck={false}/></label><button disabled={status==='loading'}>Move old decks</button></form></details>
   </>}
   {error&&<span className="account-error" role="alert">{error}</span>}
-  {accountClient&&<small>Use 3–24 letters, numbers, or underscores. Anyone who knows or guesses a username can view and edit its decks. There is no recovery or revocation.</small>}
  </div>;
 }

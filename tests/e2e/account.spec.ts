@@ -11,7 +11,7 @@ async function createUsername(page:Page){const name=uniqueName();await openUsern
 
 async function legacyAccount(){
  const values=Object.fromEntries(readFileSync('.env.local','utf8').split('\n').filter(Boolean).map(line=>{const cut=line.indexOf('=');return [line.slice(0,cut),line.slice(cut+1)];}));
- const client=createClient(values.VITE_SUPABASE_URL,values.VITE_SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:false}});
+ const client=createClient(process.env.VITE_SUPABASE_URL??values.VITE_SUPABASE_URL,process.env.VITE_SUPABASE_PUBLISHABLE_KEY??values.VITE_SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:false}});
  const signed=await client.auth.signInAnonymously();expect(signed.error).toBeNull();
  const result=await client.rpc('create_access_id');expect(result.error).toBeNull();
  return result.data![0] as {account_id:string;access_id:string};
@@ -21,7 +21,8 @@ test('username entry creates once and reopens from another browser',async({page,
  test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase');
  const name='crew_'+crypto.randomUUID().replaceAll('-','').slice(0,16);
  await page.goto('./',{waitUntil:'domcontentloaded'});
- await expect(page.getByText('Anyone who knows or guesses a username')).toBeVisible();
+ await expect(page.getByText('Anyone who knows or guesses a username')).toHaveCount(0);
+ await expect(page.getByText('Have an old access ID?')).toHaveCount(0);
  await page.getByLabel('Username', {exact:true}).fill(' '+name.toUpperCase()+' ');
  await page.getByRole('button',{name:'Continue with username'}).click();
  await expect(page.getByText('New username created')).toBeVisible();
@@ -158,7 +159,7 @@ test('old access ID claims a username without moving its decks',async({page,brow
  const old=await legacyAccount();const taken=uniqueName();const claimed=uniqueName();
  const other=await browser.newContext();const second=await other.newPage();await second.goto('./',{waitUntil:'domcontentloaded'});await openUsername(second,taken);
  await page.goto('./',{waitUntil:'domcontentloaded'});
- await page.getByText('Have an old access ID?').click();
+ await page.locator('.account-controls summary').click();
  await page.getByLabel('Enter old access ID').fill('0'.repeat(48));await page.getByRole('button',{name:'Move old decks'}).click();
  await expect(page.getByRole('alert')).toContainText('Old access ID could not be opened');
  await page.getByLabel('Enter old access ID').fill(old.access_id);await page.getByRole('button',{name:'Move old decks'}).click();
@@ -181,7 +182,7 @@ test('old access ID claims a username without moving its decks',async({page,brow
 test('an upgraded legacy browser keeps its account marker through an offline reload',async({page})=>{
  test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase');
  const old=await legacyAccount();await page.goto('./',{waitUntil:'domcontentloaded'});
- await page.getByText('Have an old access ID?').click();await page.getByLabel('Enter old access ID').fill(old.access_id);await page.getByRole('button',{name:'Move old decks'}).click();
+ await page.locator('.account-controls summary').click();await page.getByLabel('Enter old access ID').fill(old.access_id);await page.getByRole('button',{name:'Move old decks'}).click();
  await expect(page.getByLabel('Choose username')).toBeVisible();
  await page.getByRole('button',{name:'Deck builder',exact:true}).click();await page.getByRole('textbox',{name:'Deck name'}).fill('Legacy offline crew');await page.getByRole('button',{name:'Save deck',exact:true}).click();
  await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:40000});
