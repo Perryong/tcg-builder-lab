@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {execFileSync} from 'node:child_process';
 test.setTimeout(60000);
 
 test('generated access ID restores after reload and links a second browser',async({page,browser})=>{
@@ -68,4 +69,62 @@ test('Pokémon and One Piece decks share an ID but remain separate',async({page,
  await expect(blocked.getByRole('alert')).toContainText('Saved Pokémon decks could not be read',{timeout:20000});
  expect(await blocked.evaluate(()=>localStorage.getItem('tcg-builder.pokemon.decks.v1'))).toBe('{broken');
  await corrupt.close();
+});
+
+test('Yu-Gi-Oh! OCG sections reopen under the same access ID',async({page,browser})=>{
+ test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase Auth and database');
+ await page.goto('./');await page.getByRole('button',{name:'Create access ID'}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ const id=await page.getByLabel('Your access ID').inputValue();
+ await page.getByLabel('Choose card game').selectOption('yugioh');await page.getByRole('button',{name:'Yu-Gi-Oh! deck builder'}).click();
+ await page.getByLabel('Deck import and export').fill('[main]\n3 4007\n[extra]\n1 18823\n[side]\n1 4041');
+ await page.getByRole('button',{name:'Import deck',exact:true}).click();
+ await page.getByLabel('Yu-Gi-Oh! deck name').fill('OCG account deck');await page.getByLabel('Deck format').selectOption('ocg');
+ await page.getByRole('button',{name:'Save deck',exact:true}).click();await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ const other=await browser.newContext();const second=await other.newPage();await second.goto('./');
+ await second.getByLabel('Enter access ID').fill(id);await second.getByRole('button',{name:'Open saved decks'}).click();
+ await expect(second.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ await second.getByLabel('Choose card game').selectOption('yugioh');await second.getByRole('button',{name:'Yu-Gi-Oh! deck builder'}).click();
+ await expect(second.getByLabel('Saved decks')).toContainText('OCG account deck');
+ await second.getByLabel('Saved decks').selectOption({label:'OCG account deck'});
+ await expect(second.getByLabel('Deck format')).toHaveValue('ocg');
+ await expect(second.getByRole('heading',{name:'MAIN · 3'})).toBeVisible();
+ await expect(second.getByRole('heading',{name:'EXTRA · 1'})).toBeVisible();
+ await expect(second.getByRole('heading',{name:'SIDE · 1'})).toBeVisible();await other.close();
+});
+
+test('concurrent Yu-Gi-Oh! edits keep a conflict copy',async({page,browser})=>{
+ test.skip(!process.env.ACCOUNT_TEST_SUPABASE_URL,'Requires isolated local Supabase Auth and database');
+ await page.goto('./',{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'Create access ID'}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});const id=await page.getByLabel('Your access ID').inputValue();
+ await page.getByLabel('Choose card game').selectOption('yugioh');await page.getByRole('button',{name:'Yu-Gi-Oh! deck builder'}).click();
+ await page.getByLabel('Yu-Gi-Oh! deck name').fill('Original duel');await page.getByRole('button',{name:'Save deck',exact:true}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ const other=await browser.newContext();const second=await other.newPage();await second.goto('./',{waitUntil:'domcontentloaded'});
+ await second.getByLabel('Enter access ID').fill(id);await second.getByRole('button',{name:'Open saved decks'}).click();
+ await expect(second.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ await second.getByLabel('Choose card game').selectOption('yugioh');await second.getByRole('button',{name:'Yu-Gi-Oh! deck builder'}).click();
+ await second.getByLabel('Saved decks').selectOption({label:'Original duel'});
+ await page.getByLabel('Yu-Gi-Oh! deck name').fill('First edit');await page.getByRole('button',{name:'Save deck',exact:true}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ await second.getByLabel('Yu-Gi-Oh! deck name').fill('Second edit');await second.getByRole('button',{name:'Save deck',exact:true}).click();
+ await expect(second.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ await expect(second.getByLabel('Saved decks')).toContainText('First edit');
+ await expect(second.getByLabel('Saved decks')).toContainText('Second edit (from this device)');await other.close();
+});
+
+test('invalid cloud deck stays in the database and is not shown',async({page})=>{
+ test.skip(!process.env.ACCOUNT_TEST_DB_CONTAINER,'Requires isolated local Supabase database container');
+ await page.goto('./',{waitUntil:'domcontentloaded'});await page.getByRole('button',{name:'Create access ID'}).click();
+ await expect(page.locator('.account-status')).toHaveText('Cloud synced',{timeout:20000});
+ const account=await page.evaluate(()=>localStorage.getItem('tcg-builder.active-account.v1'));
+ expect(account).toMatch(/^[0-9a-f-]{36}$/);
+ const sql=`insert into public.saved_decks(account_id,game,deck_id,payload) values ('${account}','yugioh','malformed','{"id":"malformed","name":7}'::jsonb)`;
+ execFileSync('docker',['exec',process.env.ACCOUNT_TEST_DB_CONTAINER!,'psql','-U','postgres','-d','postgres','-tAc',sql]);
+ await page.reload({waitUntil:'domcontentloaded'});
+ await expect(page.getByRole('alert')).toContainText('Cloud deck data is invalid',{timeout:20000});
+ await page.getByLabel('Choose card game').selectOption('yugioh');await page.getByRole('button',{name:'Yu-Gi-Oh! deck builder'}).click();
+ await expect(page.getByLabel('Saved decks').locator('option')).toHaveCount(1);
+ const check=execFileSync('docker',['exec',process.env.ACCOUNT_TEST_DB_CONTAINER!,'psql','-U','postgres','-d','postgres','-tAc',`select revision from public.saved_decks where account_id='${account}' and deck_id='malformed'`],{encoding:'utf8'});
+ expect(check.trim()).toBe('1');
 });
