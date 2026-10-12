@@ -1,4 +1,4 @@
-import {summarizePriceHistory} from '../../../src/prices/model.ts';
+import {rankMovers, summarizePriceHistory} from '../../../src/prices/model.ts';
 
 const cors = {
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -40,6 +40,15 @@ export async function handleCardPrices(request: Request, fetchUpstream: typeof f
     const id = params.get('productId') ?? '';
     if ((game !== 'pokemon' && game !== 'one-piece') || !/^\d{1,9}$/.test(id)) return json(request, {error: 'Invalid game or product ID.'}, 400);
     upstream = new URL(`https://api.tickermint.cards/products/${id}/prices`);
+  } else if (kind === 'movers') {
+    const game = params.get('game');
+    if (game !== 'pokemon' && game !== 'one-piece') return json(request, {error: 'Invalid game.'}, 400);
+    upstream = new URL('https://api.tickermint.cards/desk/movers');
+    upstream.searchParams.set('game', game);
+    upstream.searchParams.set('days', '7');
+    upstream.searchParams.set('min_market', '5');
+    upstream.searchParams.set('min_liquidity', '6');
+    upstream.searchParams.set('limit', '20');
   } else return json(request, {error: 'Unknown price request.'}, 400);
 
   // Supabase isolates may be recycled; these limits and caches are best-effort, not global quotas.
@@ -69,13 +78,13 @@ export async function handleCardPrices(request: Request, fetchUpstream: typeof f
     if (!result.ok) return json(request, {error: result.status === 429 ? 'Price source is busy. Try again shortly.' : 'Price source unavailable.'}, result.status === 429 ? 429 : 502);
     const data = await result.json();
     if (!data || typeof data !== 'object' ||
-        (kind === 'search' ? !Array.isArray(data) : Array.isArray(data))) {
+        (kind === 'history' ? Array.isArray(data) : !Array.isArray(data))) {
       return json(request, {error: 'Price source returned unexpected data.'}, 502);
     }
     const value = kind === 'search'
       ? (data as Record<string, unknown>[]).filter(row => row && row.game === params.get('game') && Number.isInteger(row.product_id))
         .slice(0, 20).map(row => ({product_id: row.product_id, name: row.name, set_name: row.set_name, card_number: row.card_number, game: row.game}))
-      : {series: summarizePriceHistory(data)};
+      : kind === 'movers' ? rankMovers(data) : {series: summarizePriceHistory(data)};
     if (fetchUpstream === fetch) {
       if (responseCache.size >= 200) responseCache.delete(responseCache.keys().next().value!);
       responseCache.set(request.url, {expires: Date.now() + 3600000, value});

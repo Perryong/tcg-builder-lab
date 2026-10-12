@@ -48,3 +48,17 @@ test('history checks the product game and returns summaries rather than raw dail
   assert.equal(body.series[0].Holofoil, undefined);
   assert.equal(JSON.stringify(body).includes('"low"'), false);
 });
+
+test('movers are scoped to one game and return only ranked display rows', async () => {
+  let called = '';
+  const response = await handleCardPrices(new Request('https://example.test/?kind=movers&game=one-piece'), async input => {
+    called = String(input);
+    return new Response(JSON.stringify([{product_id: 123, name: 'Nami', set_name: 'Romance Dawn', sub_type_name: 'Foil',
+      base_market: '10', market: '15', pct_change: 0.5, active_count: 9, image_url: 'https://tcgplayer-cdn.tcgplayer.com/product/123_200w.jpg'}]));
+  });
+  assert.equal(called, 'https://api.tickermint.cards/desk/movers?game=one-piece&days=7&min_market=5&min_liquidity=6&limit=20');
+  assert.deepEqual(await response.json(), {gainers: [{product_id: 123, name: 'Nami', set_name: 'Romance Dawn', finish: 'Foil',
+    before: 10, after: 15, changePercent: 50, image_url: 'https://tcgplayer-cdn.tcgplayer.com/product/123_200w.jpg'}], fallers: []});
+  const yugioh = await handleCardPrices(new Request('https://example.test/?kind=movers&game=yugioh'), () => {throw new Error('Provider must not be called');});
+  assert.equal(yugioh.status, 400);
+});

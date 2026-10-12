@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {forecastPrice, normalizePriceHistory, summarizePriceHistory} from '../src/prices/model.ts';
+import {forecastPrice, normalizePriceHistory, rankMovers, summarizePriceHistory} from '../src/prices/model.ts';
 
 function history(days: number, price: (day: number) => number) {
   const start = Date.UTC(2025, 0, 1);
@@ -65,4 +65,26 @@ test('monthly chart omits raw daily values and retains the latest price', () => 
   assert.ok(summary.chart.length <= 13);
   assert.equal(summary.observations, 600);
   assert.equal(summary.latest.market, 15.99);
+});
+
+test('movement board keeps ten liquid gainers and fallers sorted by seven-day percentage', () => {
+  const rows = Array.from({length: 12}, (_, i) => ({product_id: i + 1, name: `Up ${i}`, set_name: 'Set A', sub_type_name: 'Foil',
+    base_market: '10', market: String(11 + i), image_url: 'https://assets.tcgdex.net/en/example.webp'}));
+  const declines = Array.from({length: 12}, (_, i) => ({product_id: i + 101, name: `Down ${i}`, set_name: 'Set B', sub_type_name: 'Normal',
+    base_market: '20', market: String(19 - i)}));
+  const board = rankMovers([...rows, ...declines, {...rows[11], product_id: 999, thin: true, market: '1000'},
+    {...rows[11], product_id: 998, market: 'NaN'}]);
+  assert.equal(board.gainers.length, 10);
+  assert.equal(board.fallers.length, 10);
+  assert.equal(board.gainers[0].product_id, 12);
+  assert.equal(board.fallers[0].product_id, 112);
+  assert.equal(board.gainers.some(row => row.product_id === 999 || row.product_id === 998), false);
+  assert.equal(board.gainers[0].changePercent, 120);
+});
+
+test('movement rows keep distinct finishes of the same market product', () => {
+  const common = {product_id: 87066, name: 'Magnemite', set_name: 'Set', base_market: '10'};
+  const board = rankMovers([{...common, sub_type_name: 'Normal', market: '12'},
+    {...common, sub_type_name: 'Reverse Holofoil', market: '15'}]);
+  assert.deepEqual(board.gainers.map(row => row.finish), ['Reverse Holofoil', 'Normal']);
 });

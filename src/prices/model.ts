@@ -2,6 +2,39 @@ export type PricePoint = {date: string; market: number};
 export type PriceSeries = {finish: string; points: PricePoint[]};
 export type PriceForecast = {model: 'Last price' | 'Recent trend'; estimate: number; bandLow: number; bandHigh: number; backtestCount: number; backtestError: number; reliable: boolean; asOf: string; horizon: 30 | 90};
 export type PriceSummary = {finish: string; chart: PricePoint[]; latest: PricePoint; observations: number; forecasts: {30: PriceForecast | null; 90: PriceForecast | null}};
+export type PriceMover = {product_id: number; name: string; set_name: string; finish: string; before: number; after: number; changePercent: number; image_url: string | null};
+export type MoverBoard = {gainers: PriceMover[]; fallers: PriceMover[]};
+
+export function rankMovers(raw: unknown): MoverBoard {
+  if (!Array.isArray(raw)) return {gainers: [], fallers: []};
+  const seen = new Set<string>();
+  const rows: PriceMover[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object' || item.thin || item.recovery || !Number.isInteger(item.product_id) ||
+        item.product_id <= 0 || typeof item.name !== 'string' || !item.name.trim() ||
+        typeof item.set_name !== 'string' || typeof item.sub_type_name !== 'string') continue;
+    const identity = `${item.product_id}:${item.sub_type_name}`;
+    if (seen.has(identity)) continue;
+    const before = Number(item.base_market);
+    const after = Number(item.market);
+    if (!Number.isFinite(before) || !Number.isFinite(after) || before < 5 || after <= 0) continue;
+    const changePercent = Math.round((after / before - 1) * 1000) / 10;
+    if (!changePercent) continue;
+    const url = typeof item.image_url === 'string' ? item.image_url : '';
+    let image_url: string | null = null;
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === 'https:' && ['assets.tcgdex.net', 'tcgplayer-cdn.tcgplayer.com'].includes(parsed.hostname)) image_url = parsed.toString();
+    } catch { /* No image for this market product. */ }
+    rows.push({product_id: item.product_id, name: item.name, set_name: item.set_name,
+      finish: item.sub_type_name, before, after, changePercent, image_url});
+    seen.add(identity);
+  }
+  return {
+    gainers: rows.filter(row => row.changePercent > 0).sort((a, b) => b.changePercent - a.changePercent).slice(0, 10),
+    fallers: rows.filter(row => row.changePercent < 0).sort((a, b) => a.changePercent - b.changePercent).slice(0, 10),
+  };
+}
 
 export function normalizePriceHistory(raw: unknown): PriceSeries[] {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return [];
