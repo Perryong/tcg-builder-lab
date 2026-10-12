@@ -80,6 +80,20 @@ Cloud saves require an anonymous Supabase Auth session and the SQL migration in 
 
 For isolated local account checks, run `supabase start` and `supabase test db`, then supply the local API URL and publishable key in `.env.local`; set `ACCOUNT_TEST_SUPABASE_URL` and `ACCOUNT_TEST_DB_CONTAINER` when running `tests/e2e/account.spec.ts`. Ordinary browser checks skip account cases without the local stack and never use the production database.
 
+## Pokémon and One Piece price lab
+
+The **Price lab** navigation in Pokémon and One Piece searches exact priced products, including alternate printings, then shows a monthly summary of daily USD market-price history by finish. Yu-Gi-Oh! has no price lab. The user selects the exact market product; a card number alone is not assumed to identify a unique priced artwork.
+
+The 30- and 90-day outlook compares a last-price baseline with a recent log-price trend on rolling historical windows and selects the trend only when its training error is at least 5% lower. Later windows, beginning after all training outcomes are known, supply the displayed error and the 80th-percentile error band (with a 5% floor). At least five training windows and three held-out windows are required. The band is not a probability guarantee. Estimates are withheld when average held-out error exceeds 40%, and forecasts pause when the latest source observation is over a week old. This is an experimental price trend, not a measured future value or an individual sales-price forecast.
+
+Prices come from [TickerMint](https://tickermint.cards/developers), which offers a free non-commercial API with visible attribution and forbids redistributing raw data feeds. Its API does not provide browser CORS headers, so the `card-prices` Supabase Edge Function validates requests, returns only bounded product choices, monthly chart summaries and forecast results, and keeps daily history server-side. The function has a one-hour per-isolate cache and a best-effort per-IP request limit; these are not shared global controls. Deploy it to the same project configured by `VITE_SUPABASE_URL`:
+
+```sh
+supabase functions deploy card-prices --project-ref YOUR_PROJECT_REF
+```
+
+The function needs no price-provider key. Confirm the integration with TickerMint before relying on it at public scale, and use a shared cache and gateway rate limit if traffic grows. The app never commits fetched price history to this repository.
+
 ## Pokémon support
 
 Choose **Pokémon** in the game selector to explore 21,290 English physical card printings in 201 set groups, with 20,369 remote artwork links. Pokémon TCG Pocket is excluded. The catalog comes from a pinned TCGdex public metadata repository revision recorded in the snapshot; counts describe available source records, not certified worldwide completeness. Missing images and untranslated/omitted records remain explicit limitations. Foil finishes do not inflate artwork counts.
